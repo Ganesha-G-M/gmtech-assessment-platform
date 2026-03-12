@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GMTech Dashboard</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body class="dashboard-body">
+
+
+<!-- Navbar -->
+
+<nav class="navbar navbar-dark bg-dark dashboard-nav">
+
+    <div class="container-fluid">
+
+<span class="navbar-brand">
+GMTech Assessment Platform
+</span>
+
+        <div class="nav-right">
+
+<span class="text-white me-3">
+Welcome {{ user }}
+</span>
+
+            <a href="/logout" class="logout-btn">
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<div class="container dashboard-container">
+
+    <h3 class="dashboard-title">Dashboard</h3>
+
+
+    <!-- Action Cards -->
+
+    <div class="row dashboard-actions">
+
+        {% if role == 'admin' %}
+
+        <div class="col-md-3">
+
+            <div class="action-card card-primary">
+
+                <a href="/create_quiz">
+                    Create Quiz
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="action-card card-success">
+
+                <a href="/add_question">
+                    Add Question
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="col-md-3">
+
+            <div class="action-card card-warning">
+
+                <a href="/leaderboard">
+                    Leaderboard
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="action-card card-danger">
+
+                <a href="/analytics">
+                    Analytics
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Quiz Table -->
+
+    <div class="quiz-section">
+
+        <h4 class="quiz-title">Available Quizzes</h4>
+
+        <table class="table quiz-table table-striped">
+
+            <thead>
+
+            <tr>
+                <th>Quiz</th>
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for quiz in quizzes %}
+
+            <tr>
+
+                <td>{{ quiz[1] }}</td>
+
+                <td>{{ quiz[3] }} minutes</td>
+
+                <td>
+
+                    <!-- Start Button -->
+
+                    <a href="/start_quiz/{{ quiz[0] }}"
+                       class="btn btn-primary btn-sm">
+
+                        Start
+
+                    </a>
+
+
+                    <!-- Delete Button (Admin Only) -->
+
+                    {% if role == 'admin' %}
+
+                    <a href="/delete_quiz/{{ quiz[0] }}"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to delete this quiz?');">
+
+                        Delete
+
+                    </a>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

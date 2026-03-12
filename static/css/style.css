@@ -1,0 +1,404 @@
+/* GLOBAL */
+
+body{
+margin:0;
+font-family:'Segoe UI', Arial, sans-serif;
+background:#0f172a;
+color:white;
+}
+
+
+/* HERO LANDING PAGE */
+
+.hero-section{
+height:90vh;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+}
+
+.hero-logo{
+width:160px;
+margin-bottom:20px;
+}
+
+.hero-title{
+font-size:48px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.hero-subtitle{
+font-size:20px;
+color:#cbd5f5;
+margin-bottom:30px;
+}
+
+.hero-buttons a{
+padding:12px 30px;
+margin:10px;
+border-radius:8px;
+text-decoration:none;
+font-size:18px;
+}
+
+.primary-btn{
+background:#2563eb;
+color:white;
+}
+
+.primary-btn:hover{
+background:#1d4ed8;
+}
+
+.secondary-btn{
+background:#22c55e;
+color:white;
+}
+
+.secondary-btn:hover{
+background:#16a34a;
+}
+
+
+/* NAV BUTTONS */
+
+.nav-btn{
+margin-right:10px;
+color:white;
+text-decoration:none;
+}
+
+.nav-btn-outline{
+padding:8px 15px;
+border:1px solid white;
+border-radius:5px;
+text-decoration:none;
+color:white;
+}
+
+.footer p {
+    text-align: center;
+    /* Optional: Add some padding for spacing */
+    padding: 10px 0;
+}
+
+
+
+/* AUTH PAGES (LOGIN / REGISTER) */
+
+.auth-body{
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.auth-container{
+width:100%;
+max-width:400px;
+}
+
+.auth-card{
+background:white;
+color:black;
+padding:40px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+.auth-logo{
+width:80px;
+margin-bottom:15px;
+}
+
+.auth-title{
+font-weight:bold;
+margin-bottom:5px;
+}
+
+.auth-subtitle{
+color:#555;
+margin-bottom:20px;
+}
+
+.auth-input{
+margin-bottom:15px;
+}
+
+.auth-btn{
+width:100%;
+background:#2563eb;
+border:none;
+color:white;
+padding:10px;
+border-radius:5px;
+}
+
+.auth-btn:hover{
+background:#1d4ed8;
+}
+
+.auth-footer{
+margin-top:20px;
+text-align:center;
+}
+
+.auth-link{
+color:#2563eb;
+text-decoration:none;
+}
+
+
+/* DASHBOARD */
+
+.dashboard-body{
+background:#f5f7fb;
+color:black;
+}
+
+.dashboard-container{
+margin-top:30px;
+}
+
+.dashboard-title{
+margin-bottom:20px;
+}
+
+.nav-right{
+display:flex;
+align-items:center;
+}
+
+.logout-btn{
+background:#ef4444;
+color:white;
+padding:6px 12px;
+border-radius:5px;
+text-decoration:none;
+}
+
+.action-card{
+padding:30px;
+border-radius:10px;
+text-align:center;
+font-weight:bold;
+}
+
+.action-card a{
+text-decoration:none;
+color:white;
+font-size:18px;
+}
+
+.card-primary{
+background:#2563eb;
+}
+
+.card-success{
+background:#22c55e;
+}
+
+.card-warning{
+background:#facc15;
+color:black;
+}
+
+.card-danger{
+background:#ef4444;
+}
+
+
+/* QUIZ PAGE */
+
+.quiz-body{
+background:#f5f7fb;
+}
+
+.quiz-container{
+max-width:800px;
+margin:auto;
+margin-top:40px;
+}
+
+.quiz-card{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.quiz-title{
+margin-bottom:10px;
+}
+
+.quiz-timer{
+font-size:20px;
+font-weight:bold;
+color:red;
+margin-bottom:20px;
+}
+
+.question-block{
+ margin-bottom:25px;
+ display:block;
+ }
+
+ .option-item{
+ display:block;
+ padding:8px;
+ margin-top:5px;
+ cursor:pointer;
+ }
+
+ .option-item:hover{
+ background:#f1f5f9;
+ border-radius:6px;
+ }
+
+.submit-quiz-btn{
+width:100%;
+padding:10px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:5px;
+}
+
+.submit-quiz-btn:hover{
+background:#1d4ed8;
+}
+
+
+/* RESULT PAGE */
+
+.result-body{
+background:#f5f7fb;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.result-card{
+background:white;
+padding:40px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.result-icon{
+font-size:40px;
+margin-bottom:10px;
+}
+
+.score-value{
+font-size:48px;
+color:#2563eb;
+}
+
+.result-btn-primary{
+background:#2563eb;
+color:white;
+padding:10px 20px;
+border-radius:5px;
+text-decoration:none;
+margin-right:10px;
+}
+
+.result-btn-secondary{
+background:#22c55e;
+color:white;
+padding:10px 20px;
+border-radius:5px;
+text-decoration:none;
+}
+
+
+/* LEADERBOARD */
+
+.leaderboard-body{
+background:#f5f7fb;
+}
+
+.leaderboard-container{
+max-width:800px;
+margin:auto;
+margin-top:40px;
+}
+
+.leaderboard-card{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.leaderboard-title{
+margin-bottom:5px;
+}
+
+.leaderboard-subtitle{
+color:#666;
+margin-bottom:20px;
+}
+
+.leaderboard-btn{
+background:#2563eb;
+color:white;
+padding:10px 20px;
+border-radius:5px;
+text-decoration:none;
+}
+/* FIX QUIZ TEXT VISIBILITY */
+
+.quiz-card{
+background:#ffffff;
+color:#000000;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.question-text{
+color:#000000 !important;
+font-weight:600;
+}
+
+.option-item{
+color:#000000 !important;
+display:block;
+padding:8px;
+margin-top:6px;
+cursor:pointer;
+}
+
+.option-text{
+color:#000000 !important;
+margin-left:5px;
+}
+
+.option-item:hover{
+background:#f1f5f9;
+border-radius:6px;
+}
+/* RESULT PAGE FIX */
+
+.result-card{
+background:white;
+color:black;
+}
+
+.result-card h2{
+color:black;
+}
+
+.result-card p{
+color:black;
+}
+
+.score-value{
+color:#2563eb;
+}

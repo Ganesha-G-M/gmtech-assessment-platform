@@ -1,0 +1,21 @@
+<h2>Your Quiz History</h2>
+
+<table border="1">
+
+    <tr>
+        <th>Quiz ID</th>
+        <th>Score</th>
+    </tr>
+
+    {% for h in history %}
+
+    <tr>
+        <td>{{ h[0] }}</td>
+        <td>{{ h[1] }} / {{ h[2] }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<a href="/dashboard">Back</a>

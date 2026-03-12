@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register - GMTech</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body class="auth-body">
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <div class="text-center">
+
+            <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" class="auth-logo">
+
+            <h2 class="auth-title">Create Account</h2>
+
+            <p class="auth-subtitle">Join GMTech Assessment Platform</p>
+
+        </div>
+
+        <form method="POST" class="auth-form">
+
+            <div class="form-group">
+
+                <label>Full Name</label>
+
+                <input type="text"
+                       name="name"
+                       class="form-control auth-input"
+                       placeholder="Enter your name"
+                       required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Email</label>
+
+                <input type="email"
+                       name="email"
+                       class="form-control auth-input"
+                       placeholder="Enter your email"
+                       required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Password</label>
+
+                <input type="password"
+                       name="password"
+                       class="form-control auth-input"
+                       placeholder="Create a password"
+                       required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Register As</label>
+
+                <select name="role" class="form-control auth-input">
+
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="auth-btn">
+                Register
+            </button>
+
+        </form>
+
+        <div class="auth-footer">
+
+            <p>Already have an account?</p>
+
+            <a href="/login" class="auth-link">
+                Login
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
