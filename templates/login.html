@@ -2,10 +2,8 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Login - GMTech</title>
 
     <link rel="stylesheet"
@@ -13,84 +11,55 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
-
 </head>
 
 <body class="auth-body">
 
-<div class="auth-container">
-
+<div class="auth-container" style="max-width:460px;">
     <div class="auth-card">
 
         <div class="text-center">
-
             <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" class="auth-logo">
 
             <h2 class="auth-title">Welcome Back</h2>
 
             <p class="auth-subtitle">Login to GMTech Assessment Platform</p>
-
         </div>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
 
         <form method="POST" class="auth-form">
 
             <div class="form-group">
-
                 <label>Email</label>
-
-                <input type="email"
-                       name="email"
+                <input type="email" name="email"
                        class="form-control auth-input"
-                       placeholder="Enter your email"
-                       required>
-
+                       placeholder="Enter your email" required>
             </div>
 
             <div class="form-group">
-
                 <label>Password</label>
-
-                <input type="password"
-                       name="password"
+                <input type="password" name="password"
                        class="form-control auth-input"
-                       placeholder="Enter your password"
-                       required>
-
+                       placeholder="Enter your password" required>
             </div>
 
-            <div class="form-group">
+            <!-- ❌ ROLE REMOVED (VERY IMPORTANT) -->
 
-                <label>Login As</label>
-
-                <select name="role" class="form-control auth-input">
-
-                    <option value="student">Student</option>
-                    <option value="admin">Admin</option>
-
-                </select>
-
-            </div>
-
-            <button type="submit" class="auth-btn">
-                Login
-            </button>
+            <button type="submit" class="auth-btn">Login</button>
 
         </form>
 
         <div class="auth-footer">
-
+            <p><a href="/forgot_password" class="auth-link">Forgot Password?</a></p>
             <p>Don't have an account?</p>
-
-            <a href="/register" class="auth-link">
-                Create Account
-            </a>
-
+            <a href="/register" class="auth-link">Create Account</a>
         </div>
 
     </div>
-
 </div>
 
 </body>
-
 </html>

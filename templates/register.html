@@ -2,107 +2,72 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Register - GMTech</title>
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body class="auth-body">
 
-<div class="auth-container">
-
+<div class="auth-container" style="max-width:460px;">
     <div class="auth-card">
-
         <div class="text-center">
-
             <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" class="auth-logo">
-
-            <h2 class="auth-title">Create Account</h2>
-
+            <h2 class="auth-title">
+                {% if preset_role %}Create {{ preset_role|title }} Account{% else %}Create Account{% endif %}
+            </h2>
             <p class="auth-subtitle">Join GMTech Assessment Platform</p>
-
         </div>
 
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        {% if not preset_role %}
+
+        <hr>
+        {% endif %}
+
         <form method="POST" class="auth-form">
-
             <div class="form-group">
-
                 <label>Full Name</label>
-
-                <input type="text"
-                       name="name"
-                       class="form-control auth-input"
-                       placeholder="Enter your name"
-                       required>
-
+                <input type="text" name="name" class="form-control auth-input" placeholder="Enter your name" required>
             </div>
 
             <div class="form-group">
-
                 <label>Email</label>
-
-                <input type="email"
-                       name="email"
-                       class="form-control auth-input"
-                       placeholder="Enter your email"
-                       required>
-
+                <input type="email" name="email" class="form-control auth-input" placeholder="Enter your email" required>
             </div>
 
             <div class="form-group">
-
                 <label>Password</label>
-
-                <input type="password"
-                       name="password"
-                       class="form-control auth-input"
-                       placeholder="Create a password"
-                       required>
-
+                <input type="password" name="password" class="form-control auth-input" placeholder="Create a password" required>
             </div>
 
+            {% if preset_role %}
+            <input type="hidden" name="role" value="{{ preset_role }}">
+            {% else %}
             <div class="form-group">
-
                 <label>Register As</label>
-
-                <select name="role" class="form-control auth-input">
-
-                    <option value="student">Student</option>
-                    <option value="admin">Admin</option>
-
-                </select>
-
+                <input type="hidden" name="role" value="student">
             </div>
+            {% endif %}
 
-            <button type="submit" class="auth-btn">
-                Register
-            </button>
-
+            <button type="submit" class="auth-btn">Register</button>
         </form>
 
         <div class="auth-footer">
-
             <p>Already have an account?</p>
-
-            <a href="/login" class="auth-link">
-                Login
-            </a>
-
+            {% if preset_role %}
+            <a href="/login/{{ preset_role }}" class="auth-link">Login as {{ preset_role|title }}</a>
+            {% else %}
+            <a href="/login" class="auth-link">Login</a>
+            {% endif %}
         </div>
-
     </div>
-
 </div>
 
 </body>
-
 </html>

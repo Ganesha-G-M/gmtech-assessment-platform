@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Tools</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">AI Tools</h2>
+            <p class="text-muted mb-0">Generate MCQs, coding problems, and clean messy question content.</p>
+        </div>
+        <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    {% if not ai_configured %}
+    <div class="alert alert-warning">
+        <strong>AI tools are installed, but disabled.</strong>
+        Set your Gemini key in the same PowerShell window where you run Flask, then restart the app.
+        <div class="mt-2">
+            <code>$env:AI_PROVIDER="gemini"</code><br>
+            <code>$env:GEMINI_API_KEY="your_api_key_here"</code><br>
+            <code>$env:GEMINI_MODEL="gemini-1.5-flash"</code><br>
+            <code>python app.py</code>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-success">
+        AI is configured using model <strong>{{ model }}</strong>.
+    </div>
+    {% endif %}
+
+    {% if ai_error %}
+    <div class="alert alert-danger">{{ ai_error }}</div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow p-4 h-100">
+                <h4 class="mb-3">Generate Questions</h4>
+                <form method="POST">
+                    <input type="hidden" name="action" value="generate">
+                    <div class="mb-3">
+                        <label class="form-label">Question Type</label>
+                        <select name="question_type" id="questionType" class="form-control">
+                            <option value="mcq" {% if form_data.question_type == 'mcq' %}selected{% endif %}>Multiple Choice</option>
+                            <option value="coding" {% if form_data.question_type == 'coding' %}selected{% endif %}>Coding Problem</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Topic</label>
+                        <input type="text" name="topic" class="form-control" value="{{ form_data.topic }}" placeholder="Example: Python loops, SQL joins, arrays and strings" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Difficulty</label>
+                            <select name="difficulty" class="form-control">
+                                {% for level in ['Beginner', 'Intermediate', 'Advanced'] %}
+                                <option value="{{ level }}" {% if form_data.difficulty == level %}selected{% endif %}>{{ level }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Questions</label>
+                            <input type="number" name="count" class="form-control" min="1" max="50" value="{{ form_data.count }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3" id="languageRow">
+                        <label class="form-label">Coding Language</label>
+                        <select name="language_key" class="form-control">
+                            {% for key, language in languages.items() %}
+                            <option value="{{ key }}" {% if form_data.language_key == key %}selected{% endif %}>{{ language.label }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Coding questions include starter code and visible/hidden test cases.</small>
+                    </div>
+                    <button class="btn btn-primary w-100" {% if not ai_configured %}disabled{% endif %}>Generate with AI</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow p-4 h-100">
+                <h4 class="mb-3">Clean Up MCQ</h4>
+                <form method="POST">
+                    <input type="hidden" name="action" value="cleanup">
+                    <div class="mb-3">
+                        <label class="form-label">Rough MCQ Text</label>
+                        <textarea name="raw_question" class="form-control" rows="9" placeholder="Paste rough question text here">{{ form_data.raw_question }}</textarea>
+                    </div>
+                    <button class="btn btn-outline-primary w-100" {% if not ai_configured %}disabled{% endif %}>Clean with AI</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if generated_questions %}
+    <div class="card shadow p-4 mt-4">
+        <div class="d-flex justify-content-between gap-3 flex-wrap align-items-start mb-3">
+            <div>
+                <h4 class="mb-1">Generated Questions</h4>
+                <p class="text-muted mb-0">Review before adding these to a live quiz. AI is helpful, not infallible.</p>
+            </div>
+            <a href="/add_question" class="btn btn-success">Add to Quiz</a>
+        </div>
+
+        {% for question in generated_questions %}
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between gap-3 flex-wrap">
+                <h5>Q{{ loop.index }}. {{ question.question }}</h5>
+                {% if form_data.question_type == 'coding' %}
+                <span class="badge bg-dark">{{ question.language_label }}</span>
+                {% endif %}
+            </div>
+
+            {% if form_data.question_type == 'coding' %}
+            <strong>Starter Code</strong>
+            <pre class="bg-dark text-white p-3 rounded mt-2">{{ question.starter_code }}</pre>
+            <strong>Test Cases</strong>
+            <div class="table-responsive mt-2">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Input</th>
+                            <th>Expected Output</th>
+                            <th>Visibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test_case in question.test_cases %}
+                        <tr>
+                            <td><pre class="mb-0">{{ test_case.input_data }}</pre></td>
+                            <td><pre class="mb-0">{{ test_case.expected_output }}</pre></td>
+                            <td>{% if test_case.is_hidden %}Hidden{% else %}Visible{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <ol class="mb-2">
+                <li>{{ question.option1 }}</li>
+                <li>{{ question.option2 }}</li>
+                <li>{{ question.option3 }}</li>
+                <li>{{ question.option4 }}</li>
+            </ol>
+            <strong>Correct Option:</strong> {{ question.correct_option }}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cleaned_question %}
+    <div class="card shadow p-4 mt-4">
+        <h4 class="mb-3">Cleaned Question</h4>
+        <div class="border rounded p-3">
+            <h5>{{ cleaned_question.question }}</h5>
+            <ol class="mb-2">
+                <li>{{ cleaned_question.option1 }}</li>
+                <li>{{ cleaned_question.option2 }}</li>
+                <li>{{ cleaned_question.option3 }}</li>
+                <li>{{ cleaned_question.option4 }}</li>
+            </ol>
+            <strong>Correct Option:</strong> {{ cleaned_question.correct_option }}
+        </div>
+        <a href="/add_question" class="btn btn-success mt-3">Add This to a Quiz</a>
+    </div>
+    {% endif %}
+
+    {% if raw_ai_output and not generated_questions and not cleaned_question %}
+    <div class="card shadow p-4 mt-4">
+        <h4 class="mb-3">Raw AI Output</h4>
+        <pre class="bg-light p-3 rounded">{{ raw_ai_output }}</pre>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const questionType = document.getElementById("questionType");
+    const languageRow = document.getElementById("languageRow");
+
+    function refreshLanguageRow(){
+        if(!questionType || !languageRow) return;
+        languageRow.style.display = questionType.value === "coding" ? "block" : "none";
+    }
+
+    if(questionType){
+        questionType.addEventListener("change", refreshLanguageRow);
+        refreshLanguageRow();
+    }
+</script>
+</body>
+</html>

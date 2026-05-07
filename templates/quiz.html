@@ -1,168 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz_title if quiz_title else 'GMTech Quiz' }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% if proctoring_required %}
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+    {% endif %}
+    <style>
+        .proctor-card{
+            padding:14px;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            background:#ffffff;
+            box-shadow:0 14px 34px rgba(15,23,42,0.07);
+        }
 
-    <title>GMTech Quiz</title>
+        .proctor-card span{
+            display:block;
+            margin-bottom:8px;
+            color:#64748b;
+            font-size:12px;
+            font-weight:900;
+            letter-spacing:0.08em;
+            text-transform:uppercase;
+        }
 
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        .proctor-video-wrap{
+            position:relative;
+            overflow:hidden;
+            border-radius:12px;
+            background:#0f172a;
+            aspect-ratio:4 / 3;
+            margin-bottom:10px;
+        }
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+        #proctorVideo{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            transform:scaleX(-1);
+        }
 
+        .proctor-status{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            color:#334155;
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .proctor-dot{
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            background:#94a3b8;
+            box-shadow:0 0 0 4px rgba(148,163,184,0.18);
+        }
+
+        .proctor-status.ready .proctor-dot{
+            background:#22c55e;
+            box-shadow:0 0 0 4px rgba(34,197,94,0.18);
+        }
+
+        .proctor-status.warn .proctor-dot{
+            background:#f59e0b;
+            box-shadow:0 0 0 4px rgba(245,158,11,0.18);
+        }
+
+        .proctor-status.danger .proctor-dot{
+            background:#ef4444;
+            box-shadow:0 0 0 4px rgba(239,68,68,0.18);
+        }
+
+        .proctor-note{
+            margin:8px 0 0;
+            color:#64748b;
+            font-size:12px;
+            line-height:1.35;
+        }
+
+        .proctor-warning{
+            position:fixed;
+            right:18px;
+            bottom:18px;
+            z-index:30;
+            max-width:340px;
+            display:none;
+            padding:14px 16px;
+            border-radius:16px;
+            border:1px solid #fed7aa;
+            background:#fff7ed;
+            color:#9a3412;
+            box-shadow:0 18px 48px rgba(15,23,42,0.16);
+            font-weight:700;
+        }
+    </style>
 </head>
+<body class="leet-quiz-body gm-light-quiz">
 
-<body class="quiz-body">
+<form id="quizForm" method="POST" action="{{ url_for('submit_quiz', quiz_id=quiz_id) }}">
+    <main class="leet-quiz-shell">
+        <aside class="leet-quiz-sidebar">
+            <div class="leet-quiz-brand">GMTech</div>
+            <div class="leet-timer-card">
+                <span>Time Left</span>
+                <strong id="timer"></strong>
+            </div>
+            <div class="leet-progress-card">
+                <span id="progressText">Question 1 of {{ questions|length }}</span>
+                <div class="leet-progress-track"><div id="progressBar"></div></div>
+            </div>
+            {% if proctoring_required %}
+            <div class="proctor-card" aria-live="polite">
+                <span>Camera Proctoring</span>
+                <div class="proctor-video-wrap">
+                    <video id="proctorVideo" autoplay muted playsinline></video>
+                </div>
+                <div id="proctorStatus" class="proctor-status warn">
+                    <i class="proctor-dot"></i>
+                    <strong>Starting camera check...</strong>
+                </div>
+                <p class="proctor-note">Keep your face visible and avoid phones or extra people near the camera.</p>
+            </div>
+            {% endif %}
+            <div class="leet-question-palette">
+                {% for q in questions %}
+                <button type="button"
+                        class="question-btn {% if loop.first %}active{% endif %}"
+                        data-question-index="{{ loop.index0 }}">
+                    {{ loop.index }}
+                </button>
+                {% endfor %}
+            </div>
+            <button class="leet-submit-sidebar" type="submit">Submit Assessment</button>
+        </aside>
 
-<div class="container quiz-container">
-
-    <div class="quiz-card">
-
-        <h2 class="quiz-title text-center">
-            GMTech Quiz
-        </h2>
-
-        <p class="quiz-timer text-center">
-            Time Left: <span id="timer"></span>
-        </p>
-
-        <form id="quizForm" method="POST" action="{{ url_for('submit_quiz', quiz_id=quiz_id) }}">
+        <section class="leet-quiz-main">
+            <header class="leet-quiz-topbar">
+                <div>
+                    <h1>{{ quiz_title if quiz_title else 'GMTech Quiz' }}</h1>
+                    <p>Professional assessment workspace. Answer carefully before submission.</p>
+                </div>
+                <span class="leet-safe-badge">Secure Mode</span>
+            </header>
 
             {% if questions %}
-
             {% for q in questions %}
+            <article class="question-step {% if loop.first %}active{% endif %}" id="question-step-{{ loop.index0 }}">
+                <div class="leet-workspace {% if q.question_type == 'coding' %}coding-workspace{% endif %}">
+                    <section class="leet-problem-panel">
+                        <div class="leet-panel-head">
+                            <span>Question {{ loop.index }}</span>
+                            <strong>{{ 'Coding' if q.question_type == 'coding' else 'Multiple Choice' }}</strong>
+                        </div>
+                        <h2>{{ q.question }}</h2>
 
-            <div class="question-block">
+                        {% if q.question_type == 'coding' and q.visible_test_cases %}
+                        <div class="leet-samples">
+                            <h3>Sample Test Cases</h3>
+                            {% for test_case in q.visible_test_cases %}
+                            <div class="leet-sample-card">
+                                <span>Input</span>
+                                <pre>{{ test_case.input_data }}</pre>
+                                <span>Expected Output</span>
+                                <pre>{{ test_case.expected_output }}</pre>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </section>
 
-                <h5 class="question-text">
-                    {{ loop.index }}. {{ q[2] }}
-                </h5>
-
-                <div class="option-list">
-
-                    <label class="option-item">
-                        <input type="radio" name="q{{ q[0] }}" value="1" required>
-                        <span class="option-text">{{ q[3] }}</span>
-                    </label>
-
-                    <label class="option-item">
-                        <input type="radio" name="q{{ q[0] }}" value="2">
-                        <span class="option-text">{{ q[4] }}</span>
-                    </label>
-
-                    <label class="option-item">
-                        <input type="radio" name="q{{ q[0] }}" value="3">
-                        <span class="option-text">{{ q[5] }}</span>
-                    </label>
-
-                    <label class="option-item">
-                        <input type="radio" name="q{{ q[0] }}" value="4">
-                        <span class="option-text">{{ q[6] }}</span>
-                    </label>
-
+                    <section class="leet-answer-panel">
+                        {% if q.question_type == 'coding' %}
+                        <div class="leet-panel-head">
+                            <span>Editor</span>
+                            <div class="leet-editor-meta">
+                                <strong>Write Solution</strong>
+                                <label class="leet-language-select">
+                                    <span>Language</span>
+                                    <select name="language_q{{ q.id }}" data-question-id="{{ q.id }}">
+                                        {% for key, language in q.language_options.items() %}
+                                        <option value="{{ key }}" {% if key == q.language_key %}selected{% endif %}>
+                                            {{ language.label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <textarea class="code-editor"
+                                  name="code_q{{ q.id }}"
+                                  data-question-id="{{ q.id }}"
+                                  data-language="{{ q.language_key }}"
+                                  placeholder="{% if q.language_key == 'java' %}Write Java code here. Use public class Main.{% else %}Write Python code here.{% endif %}">{{ q.starter_code }}</textarea>
+                        {% if coding_enabled %}
+                        <div class="leet-run-row">
+                            <button type="button" class="leet-run-btn run-code-btn" data-question-id="{{ q.id }}">Run Code</button>
+                        </div>
+                        <div class="run-output" id="run-output-{{ q.id }}"></div>
+                        {% else %}
+                        <div class="run-output" style="display:block;">
+                            <strong>Code execution disabled</strong>
+                            <pre>Local compiler is not enabled for this session. Write your answer and submit when ready.</pre>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="leet-panel-head">
+                            <span>Answer</span>
+                            <strong>Select one option</strong>
+                        </div>
+                        <div class="option-list">
+                            {% for opt in q.options %}
+                            <label class="option-item">
+                                <input type="radio" name="q{{ q.id }}" value="{{ opt[0] }}">
+                                <span class="option-letter">{{ loop.index }}</span>
+                                <span class="option-text">{{ opt[1] }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </section>
                 </div>
 
-            </div>
-
-            <hr>
-
+                <div class="leet-quiz-actions">
+                    <button type="button" class="leet-nav-btn prev-btn" {% if loop.first %}disabled{% endif %}>Previous</button>
+                    {% if loop.last %}
+                    <button type="submit" class="leet-primary-submit">Submit Quiz</button>
+                    {% else %}
+                    <button type="button" class="leet-primary-submit next-btn">Next</button>
+                    {% endif %}
+                </div>
+            </article>
             {% endfor %}
-
             {% else %}
-
-            <h4 class="text-center text-danger">
-                No questions found for this quiz.
-            </h4>
-
+            <div class="leet-empty-test">No questions found for this quiz.</div>
             {% endif %}
-
-            <button type="submit" class="submit-quiz-btn">
-                Submit Quiz
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
-
+        </section>
+    </main>
+</form>
+{% if proctoring_required %}
+<div id="proctorWarning" class="proctor-warning"></div>
+{% endif %}
 
 <script>
-
-    /* TIMER (Dynamic from Flask) */
-
     let time = {{ time_limit }};
+    const quizForm = document.getElementById("quizForm");
+    const timerElement = document.getElementById("timer");
 
     function updateTimer(){
-
-    let minutes = Math.floor(time / 60);
-    let seconds = time % 60;
-
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-
-    document.getElementById("timer").innerText = minutes + ":" + seconds;
-
+        const minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        timerElement.innerText = minutes + ":" + seconds;
     }
 
     updateTimer();
-
-    let timer = setInterval(function(){
-
-    time--;
-
-    updateTimer();
-
-    if(time <= 0){
-    clearInterval(timer);
-    alert("Time is up!");
-    document.getElementById("quizForm").submit();
-    }
-
-    },1000);
-
-
-    /* FULLSCREEN MODE */
+    const timer = setInterval(function(){
+        time--;
+        updateTimer();
+        if(time <= 0){
+            clearInterval(timer);
+            alert("Time is up. Your assessment will be submitted.");
+            quizForm.submit();
+        }
+    }, 1000);
 
     function startFullscreen(){
-    if(document.documentElement.requestFullscreen){
-    document.documentElement.requestFullscreen();
+        if(document.documentElement.requestFullscreen){
+            document.documentElement.requestFullscreen().catch(() => {
+                logAntiCheat("fullscreen_blocked", "Browser did not allow fullscreen.");
+            });
+        }
     }
-    }
-
     startFullscreen();
 
+    let allowPageExit = false;
+    function logAntiCheat(eventType, details){
+        const payload = JSON.stringify({event_type: eventType, details: details || ""});
+        const url = "/log_anti_cheat/{{ quiz_id }}";
 
-    /* TAB SWITCH DETECTION */
+        if(navigator.sendBeacon){
+            navigator.sendBeacon(url, new Blob([payload], {type: "application/json"}));
+            return;
+        }
 
-    document.addEventListener("visibilitychange", function(){
-
-    if(document.hidden){
-    alert("You switched tabs! Exam will be submitted.");
-    document.getElementById("quizForm").submit();
+        fetch(url, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: payload,
+            keepalive: true
+        }).catch(() => {});
     }
 
+    document.addEventListener("visibilitychange", function(){
+        if(document.hidden && !allowPageExit){
+            logAntiCheat("tab_switch", "Student left the quiz tab or minimized the window.");
+            alert("Tab switching detected. Exam will be submitted.");
+            allowPageExit = true;
+            quizForm.submit();
+        }
     });
-
-
-    /* DISABLE RIGHT CLICK */
 
     document.addEventListener("contextmenu", function(e){
-    e.preventDefault();
+        e.preventDefault();
+        logAntiCheat("right_click", "Student attempted to open the context menu.");
     });
-
-
-    /* DISABLE COPY */
-
     document.addEventListener("copy", function(e){
-    e.preventDefault();
-    alert("Copying is not allowed during the exam.");
+        e.preventDefault();
+        logAntiCheat("copy_attempt", "Student attempted to copy content during the quiz.");
+        alert("Copying is not allowed during the exam.");
     });
 
-</script>
+    document.addEventListener("fullscreenchange", function(){
+        if(!document.fullscreenElement && !allowPageExit){
+            logAntiCheat("fullscreen_exit", "Student exited fullscreen mode.");
+        }
+    });
 
+
+    {% if proctoring_required %}
+    const proctorVideo = document.getElementById("proctorVideo");
+    const proctorStatus = document.getElementById("proctorStatus");
+    const proctorWarning = document.getElementById("proctorWarning");
+    let proctorStream = null;
+    let objectModel = null;
+    let faceModel = null;
+    let proctorReady = false;
+    const proctorLastLog = {};
+    const proctorViolationCounts = {};
+
+    function updateProctorStatus(state, message){
+        if(!proctorStatus) return;
+        proctorStatus.classList.remove("ready", "warn", "danger");
+        proctorStatus.classList.add(state);
+        const label = proctorStatus.querySelector("strong");
+        if(label) label.innerText = message;
+    }
+
+    function showProctorWarning(message){
+        if(!proctorWarning) return;
+        proctorWarning.innerText = message;
+        proctorWarning.style.display = "block";
+        clearTimeout(showProctorWarning.timer);
+        showProctorWarning.timer = setTimeout(() => {
+            proctorWarning.style.display = "none";
+        }, 5200);
+    }
+
+    function logProctorEvent(eventType, details, cooldownMs = 20000){
+        const now = Date.now();
+        if(proctorLastLog[eventType] && now - proctorLastLog[eventType] < cooldownMs){
+            return;
+        }
+        proctorLastLog[eventType] = now;
+        proctorViolationCounts[eventType] = (proctorViolationCounts[eventType] || 0) + 1;
+        logAntiCheat(eventType, details + " Count: " + proctorViolationCounts[eventType]);
+    }
+
+    async function waitForProctorLibraries(){
+        const startedAt = Date.now();
+        while(Date.now() - startedAt < 12000){
+            if(window.cocoSsd && window.blazeface){
+                return true;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        return false;
+    }
+
+    async function startCameraProctoring(){
+        if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+            updateProctorStatus("danger", "Camera not supported");
+            logProctorEvent("camera_not_supported", "Browser does not support camera access.", 60000);
+            return;
+        }
+
+        try{
+            proctorStream = await navigator.mediaDevices.getUserMedia({
+                video: {facingMode: "user", width: {ideal: 480}, height: {ideal: 360}},
+                audio: false
+            });
+            proctorVideo.srcObject = proctorStream;
+            updateProctorStatus("warn", "Loading proctor models...");
+        }catch(error){
+            updateProctorStatus("danger", "Camera permission denied");
+            logProctorEvent("camera_denied", "Student denied or blocked camera access: " + error, 60000);
+            showProctorWarning("Camera access is required for protected assessments. Please allow camera access.");
+            return;
+        }
+
+        const librariesLoaded = await waitForProctorLibraries();
+        if(!librariesLoaded){
+            updateProctorStatus("warn", "Camera on, AI check unavailable");
+            logProctorEvent("proctor_model_unavailable", "Camera started, but browser proctoring models did not load.", 60000);
+            return;
+        }
+
+        try{
+            [objectModel, faceModel] = await Promise.all([
+                cocoSsd.load(),
+                blazeface.load()
+            ]);
+            proctorReady = true;
+            updateProctorStatus("ready", "Camera check active");
+            logAntiCheat("camera_started", "Camera proctoring started successfully.");
+            setInterval(runProctoringCheck, 4500);
+        }catch(error){
+            updateProctorStatus("warn", "Camera on, AI check failed");
+            logProctorEvent("proctor_model_error", "Unable to initialize proctoring models: " + error, 60000);
+        }
+    }
+
+    async function runProctoringCheck(){
+        if(!proctorReady || allowPageExit || !proctorVideo || proctorVideo.readyState < 2){
+            return;
+        }
+
+        try{
+            const [objects, faces] = await Promise.all([
+                objectModel.detect(proctorVideo),
+                faceModel.estimateFaces(proctorVideo, false)
+            ]);
+            const phones = objects.filter((item) => item.class === "cell phone" && item.score >= 0.45);
+
+            if(faces.length === 0){
+                updateProctorStatus("danger", "No face detected");
+                logProctorEvent("no_face_detected", "No face visible in the proctoring camera.");
+                showProctorWarning("Please keep your face visible during the assessment.");
+                return;
+            }
+
+            if(faces.length > 1){
+                updateProctorStatus("danger", "Multiple faces detected");
+                logProctorEvent("multiple_faces_detected", "More than one face is visible in the camera.");
+                showProctorWarning("Only the test taker should be visible during the assessment.");
+                return;
+            }
+
+            if(phones.length > 0){
+                updateProctorStatus("danger", "Phone-like object detected");
+                logProctorEvent("phone_detected", "Possible phone detected near the student. Confidence: " + Math.round(phones[0].score * 100) + "%");
+                showProctorWarning("A phone-like object was detected. Please keep phones away from the assessment area.");
+                return;
+            }
+
+            updateProctorStatus("ready", "Camera check active");
+        }catch(error){
+            updateProctorStatus("warn", "Camera check interrupted");
+            logProctorEvent("proctor_check_error", "Proctoring check failed: " + error, 60000);
+        }
+    }
+
+    window.addEventListener("beforeunload", () => {
+        if(proctorStream){
+            proctorStream.getTracks().forEach((track) => track.stop());
+        }
+    });
+
+    startCameraProctoring();
+    {% endif %}
+
+    const questionSteps = document.querySelectorAll(".question-step");
+    const questionButtons = document.querySelectorAll(".question-btn");
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    let currentQuestionIndex = 0;
+
+    function updateProgress(){
+        if(progressText){
+            progressText.innerText = "Question " + (currentQuestionIndex + 1) + " of " + questionSteps.length;
+        }
+        if(progressBar && questionSteps.length){
+            progressBar.style.width = (((currentQuestionIndex + 1) / questionSteps.length) * 100) + "%";
+        }
+    }
+
+    function refreshAnsweredState(){
+        questionSteps.forEach((step, stepIndex) => {
+            const selectedAnswer = step.querySelector('input[type="radio"]:checked');
+            const codeAnswer = step.querySelector(".code-editor");
+            questionButtons[stepIndex].classList.toggle("answered", Boolean(selectedAnswer || (codeAnswer && codeAnswer.value.trim())));
+        });
+    }
+
+    function showQuestion(index){
+        if(index < 0 || index >= questionSteps.length) return;
+        questionSteps.forEach((step, stepIndex) => step.classList.toggle("active", stepIndex === index));
+        questionButtons.forEach((button, buttonIndex) => button.classList.toggle("active", buttonIndex === index));
+        currentQuestionIndex = index;
+        updateProgress();
+        refreshAnsweredState();
+    }
+
+    questionButtons.forEach((button) => {
+        button.addEventListener("click", () => showQuestion(Number(button.dataset.questionIndex)));
+    });
+
+    document.querySelectorAll('input[type="radio"]').forEach((input) => input.addEventListener("change", refreshAnsweredState));
+    document.querySelectorAll(".code-editor").forEach((editor) => editor.addEventListener("input", refreshAnsweredState));
+
+    document.querySelectorAll(".next-btn").forEach((button) => {
+        button.addEventListener("click", function(){
+            const activeStep = questionSteps[currentQuestionIndex];
+            const selectedAnswer = activeStep.querySelector('input[type="radio"]:checked');
+            const codeAnswer = activeStep.querySelector(".code-editor");
+            if(!selectedAnswer && !(codeAnswer && codeAnswer.value.trim())){
+                alert("Please answer before moving to the next question.");
+                return;
+            }
+            showQuestion(currentQuestionIndex + 1);
+        });
+    });
+
+    document.querySelectorAll(".prev-btn").forEach((button) => button.addEventListener("click", () => showQuestion(currentQuestionIndex - 1)));
+
+    quizForm.addEventListener("submit", function(e){
+        for(const step of questionSteps){
+            const selectedAnswer = step.querySelector('input[type="radio"]:checked');
+            const codeAnswer = step.querySelector(".code-editor");
+            if(!selectedAnswer && !(codeAnswer && codeAnswer.value.trim())){
+                e.preventDefault();
+                alert("Please answer all questions before submitting the quiz.");
+                return;
+            }
+        }
+        allowPageExit = true;
+    });
+
+    function escapeHtml(value){
+        return String(value || "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    document.querySelectorAll(".run-code-btn").forEach((button) => {
+        button.addEventListener("click", async function(){
+            const questionId = button.dataset.questionId;
+            const editor = document.querySelector('.code-editor[data-question-id="' + questionId + '"]');
+            const languageSelect = document.querySelector('select[name="language_q' + questionId + '"]');
+            const output = document.getElementById("run-output-" + questionId);
+            if(!editor || !editor.value.trim()){
+                alert("Write code before running.");
+                return;
+            }
+            output.style.display = "block";
+            output.innerHTML = "<strong>Running...</strong>";
+            button.disabled = true;
+            try{
+                const response = await fetch("/run_code/" + questionId, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        source_code: editor.value,
+                        language_key: languageSelect ? languageSelect.value : editor.dataset.language
+                    })
+                });
+                const data = await response.json();
+                if(!data.ok){
+                    output.innerHTML = "<strong>Error</strong><pre>" + escapeHtml(data.error || "Unable to run code") + "</pre>";
+                    return;
+                }
+                const caseRows = (data.cases || []).map((testCase, index) => {
+                    const badge = testCase.passed ? "Passed" : "Failed";
+                    const badgeClass = testCase.passed ? "text-success" : "text-danger";
+                    return '<div class="leet-sample-card">' +
+                        '<strong class="' + badgeClass + '">Case ' + (index + 1) + ': ' + badge + '</strong>' +
+                        "<span>Input</span><pre>" + escapeHtml(testCase.input) + "</pre>" +
+                        "<span>Expected Output</span><pre>" + escapeHtml(testCase.expected) + "</pre>" +
+                        "<span>Your Output</span><pre>" + escapeHtml(testCase.output) + "</pre>" +
+                        "<span>Status</span><pre>" + escapeHtml(testCase.status) + "</pre>" +
+                    "</div>";
+                }).join("");
+                output.innerHTML =
+                    "<strong>Status:</strong> " + escapeHtml(data.status) +
+                    "<br><strong>Passed:</strong> " + escapeHtml(data.passed) + " / " + escapeHtml(data.total) +
+                    '<div class="mt-2">' + caseRows + '</div>';
+            }catch(error){
+                output.innerHTML = "<strong>Error</strong><pre>" + escapeHtml(error) + "</pre>";
+            }finally{
+                button.disabled = false;
+            }
+        });
+    });
+
+    updateProgress();
+    refreshAnsweredState();
+</script>
 </body>
 </html>

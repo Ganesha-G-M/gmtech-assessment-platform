@@ -1,100 +1,437 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GMTech Analytics</title>
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root{
+            --analytics-ink:#14213d;
+            --analytics-muted:#64748b;
+            --analytics-line:#dbe4f0;
+            --analytics-card:#ffffff;
+            --analytics-blue:#2563eb;
+            --analytics-green:#16a34a;
+            --analytics-amber:#d97706;
+            --analytics-red:#dc2626;
+        }
 
+        .analytics-body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,99,235,0.16), transparent 34rem),
+                radial-gradient(circle at bottom right, rgba(22,163,74,0.12), transparent 30rem),
+                linear-gradient(135deg, #f8fbff 0%, #eef4f8 100%);
+            color:var(--analytics-ink);
+        }
+
+        .analytics-shell{
+            max-width:1220px;
+            margin:0 auto;
+            padding:34px 18px 50px;
+        }
+
+        .analytics-hero{
+            display:flex;
+            justify-content:space-between;
+            gap:24px;
+            align-items:flex-start;
+            margin-bottom:26px;
+        }
+
+        .analytics-kicker{
+            display:inline-flex;
+            padding:7px 12px;
+            border-radius:999px;
+            background:#e0f2fe;
+            color:#075985;
+            font-weight:700;
+            font-size:13px;
+            margin-bottom:10px;
+        }
+
+        .analytics-hero h1{
+            font-size:38px;
+            font-weight:800;
+            margin:0 0 8px;
+            letter-spacing:-0.04em;
+        }
+
+        .analytics-hero p{
+            margin:0;
+            color:var(--analytics-muted);
+            max-width:650px;
+        }
+
+        .analytics-back{
+            text-decoration:none;
+            color:white;
+            background:var(--analytics-ink);
+            padding:12px 18px;
+            border-radius:14px;
+            font-weight:700;
+            white-space:nowrap;
+            box-shadow:0 16px 35px rgba(15,23,42,0.16);
+        }
+
+        .analytics-metrics{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0, 1fr));
+            gap:16px;
+            margin-bottom:18px;
+        }
+
+        .analytics-card{
+            background:rgba(255,255,255,0.88);
+            border:1px solid rgba(219,228,240,0.95);
+            border-radius:24px;
+            padding:22px;
+            box-shadow:0 18px 45px rgba(15,23,42,0.08);
+            backdrop-filter:blur(10px);
+        }
+
+        .metric-card{
+            position:relative;
+            overflow:hidden;
+        }
+
+        .metric-card:after{
+            content:"";
+            position:absolute;
+            right:-32px;
+            top:-32px;
+            width:88px;
+            height:88px;
+            border-radius:50%;
+            background:rgba(37,99,235,0.1);
+        }
+
+        .metric-card.green:after{background:rgba(22,163,74,0.12);}
+        .metric-card.amber:after{background:rgba(217,119,6,0.13);}
+        .metric-card.red:after{background:rgba(220,38,38,0.1);}
+
+        .metric-label{
+            display:block;
+            color:var(--analytics-muted);
+            font-weight:700;
+            font-size:13px;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+            margin-bottom:10px;
+        }
+
+        .metric-value{
+            display:block;
+            font-size:34px;
+            font-weight:850;
+            letter-spacing:-0.04em;
+        }
+
+        .metric-note{
+            display:block;
+            color:var(--analytics-muted);
+            margin-top:6px;
+            font-size:14px;
+        }
+
+        .analytics-grid{
+            display:grid;
+            grid-template-columns:1.25fr 0.75fr;
+            gap:18px;
+            margin-top:18px;
+        }
+
+        .analytics-card h2{
+            font-size:20px;
+            font-weight:800;
+            margin:0 0 16px;
+        }
+
+        .chart-wrap{
+            min-height:300px;
+        }
+
+        .mini-grid{
+            display:grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap:14px;
+        }
+
+        .mini-stat{
+            border:1px solid var(--analytics-line);
+            border-radius:18px;
+            padding:16px;
+            background:#f8fafc;
+        }
+
+        .mini-stat span{
+            color:var(--analytics-muted);
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .mini-stat strong{
+            display:block;
+            margin-top:6px;
+            font-size:24px;
+        }
+
+        .analytics-table{
+            width:100%;
+            border-collapse:separate;
+            border-spacing:0 10px;
+        }
+
+        .analytics-table th{
+            color:var(--analytics-muted);
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+            padding:0 12px;
+        }
+
+        .analytics-table td{
+            background:#f8fafc;
+            border-top:1px solid var(--analytics-line);
+            border-bottom:1px solid var(--analytics-line);
+            padding:13px 12px;
+            vertical-align:middle;
+        }
+
+        .analytics-table td:first-child{
+            border-left:1px solid var(--analytics-line);
+            border-radius:14px 0 0 14px;
+            font-weight:700;
+        }
+
+        .analytics-table td:last-child{
+            border-right:1px solid var(--analytics-line);
+            border-radius:0 14px 14px 0;
+        }
+
+        .score-pill{
+            display:inline-flex;
+            min-width:70px;
+            justify-content:center;
+            padding:6px 10px;
+            border-radius:999px;
+            background:#dbeafe;
+            color:#1d4ed8;
+            font-weight:800;
+        }
+
+        .empty-note{
+            color:var(--analytics-muted);
+            background:#f8fafc;
+            border:1px dashed var(--analytics-line);
+            border-radius:18px;
+            padding:18px;
+            margin:0;
+        }
+
+        @media (max-width: 992px){
+            .analytics-metrics,
+            .analytics-grid{
+                grid-template-columns:1fr 1fr;
+            }
+
+            .analytics-grid .wide-card{
+                grid-column:1 / -1;
+            }
+        }
+
+        @media (max-width: 720px){
+            .analytics-hero{
+                flex-direction:column;
+            }
+
+            .analytics-metrics,
+            .analytics-grid,
+            .mini-grid{
+                grid-template-columns:1fr;
+            }
+
+            .analytics-hero h1{
+                font-size:30px;
+            }
+        }
+    </style>
 </head>
-
-<body class="dashboard-body">
-
-<div class="container mt-5">
-
-    <h2 class="text-center mb-4">GMTech Analytics Dashboard</h2>
-
-    <div class="row text-center">
-
-        <div class="col-md-4">
-
-            <div class="card p-4 shadow">
-                <h4>Total Users</h4>
-                <h2>{{ users }}</h2>
-            </div>
-
+<body class="analytics-body">
+<main class="analytics-shell">
+    <header class="analytics-hero">
+        <div>
+            <span class="analytics-kicker">Admin Intelligence</span>
+            <h1>Analytics Dashboard</h1>
+            <p>Track platform growth, quiz activity, pass performance, and question coverage from one focused admin view.</p>
         </div>
+        <a class="analytics-back" href="/dashboard">Back to Dashboard</a>
+    </header>
 
-        <div class="col-md-4">
+    <section class="analytics-metrics">
+        <article class="analytics-card metric-card">
+            <span class="metric-label">Users</span>
+            <strong class="metric-value">{{ users }}</strong>
+            <span class="metric-note">{{ students }} students, {{ admins }} admins</span>
+        </article>
+        <article class="analytics-card metric-card green">
+            <span class="metric-label">Attempts</span>
+            <strong class="metric-value">{{ attempts }}</strong>
+            <span class="metric-note">{{ passed_attempts }} passed attempts</span>
+        </article>
+        <article class="analytics-card metric-card amber">
+            <span class="metric-label">Average Score</span>
+            <strong class="metric-value">{{ average_score }}%</strong>
+            <span class="metric-note">Across all submitted quizzes</span>
+        </article>
+        <article class="analytics-card metric-card red">
+            <span class="metric-label">Pass Rate</span>
+            <strong class="metric-value">{{ pass_rate }}%</strong>
+            <span class="metric-note">Pass mark is 50%</span>
+        </article>
+    </section>
 
-            <div class="card p-4 shadow">
-                <h4>Total Quizzes</h4>
-                <h2>{{ quizzes }}</h2>
+    <section class="analytics-grid">
+        <article class="analytics-card wide-card">
+            <h2>Quiz Performance</h2>
+            {% if quiz_performance %}
+            <div class="chart-wrap">
+                <canvas id="quizPerformanceChart"></canvas>
             </div>
+            {% else %}
+            <p class="empty-note">No quizzes found yet.</p>
+            {% endif %}
+        </article>
 
-        </div>
-
-        <div class="col-md-4">
-
-            <div class="card p-4 shadow">
-                <h4>Total Attempts</h4>
-                <h2>{{ attempts }}</h2>
+        <article class="analytics-card">
+            <h2>Score Distribution</h2>
+            <div class="chart-wrap">
+                <canvas id="scoreDistributionChart"></canvas>
             </div>
+        </article>
+    </section>
 
-        </div>
+    <section class="analytics-grid">
+        <article class="analytics-card">
+            <h2>Platform Snapshot</h2>
+            <div class="mini-grid">
+                <div class="mini-stat"><span>Total Quizzes</span><strong>{{ quizzes }}</strong></div>
+                <div class="mini-stat"><span>Total Questions</span><strong>{{ total_questions }}</strong></div>
+                <div class="mini-stat"><span>Anti-cheat Events</span><strong>{{ anti_cheat_events }}</strong></div>
+                <div class="mini-stat"><span>Question Types</span><strong>{{ question_type_counts|length }}</strong></div>
+            </div>
+            <div class="chart-wrap mt-3">
+                <canvas id="questionTypeChart"></canvas>
+            </div>
+        </article>
 
-    </div>
-
-
-    <div class="mt-5">
-
-        <canvas id="analyticsChart"></canvas>
-
-    </div>
-
-
-    <div class="text-center mt-4">
-
-        <a href="/dashboard" class="btn btn-primary">
-            Back to Dashboard
-        </a>
-
-    </div>
-
-</div>
-
+        <article class="analytics-card">
+            <h2>Recent Attempts</h2>
+            {% if recent_attempts %}
+            <table class="analytics-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Quiz</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in recent_attempts %}
+                    <tr>
+                        <td>{{ attempt[0] }}</td>
+                        <td>{{ attempt[1] }}</td>
+                        <td><span class="score-pill">{{ attempt[2] }}/{{ attempt[3] }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-note">No quiz attempts yet. Once students submit quizzes, they will appear here.</p>
+            {% endif %}
+        </article>
+    </section>
+</main>
 
 <script>
+    const analyticsData = {{ chart_payload|safe }};
 
-    const ctx = document.getElementById('analyticsChart');
+    Chart.defaults.font.family = "Georgia, 'Times New Roman', serif";
+    Chart.defaults.color = "#334155";
 
-    new Chart(ctx, {
-    type: 'bar',
-    data: {
-    labels: ['Users', 'Quizzes', 'Attempts'],
-    datasets: [{
-    label: 'GMTech Platform Data',
-    data: [{{ users }}, {{ quizzes }}, {{ attempts }}],
-    borderWidth: 1
-    }]
-    },
-    options: {
-    scales: {
-    y: {
-    beginAtZero: true
+    const quizChart = document.getElementById("quizPerformanceChart");
+    if(quizChart){
+        new Chart(quizChart, {
+            type: "bar",
+            data: {
+                labels: analyticsData.quiz_labels,
+                datasets: [
+                    {
+                        label: "Attempts",
+                        data: analyticsData.quiz_attempts,
+                        backgroundColor: "rgba(37, 99, 235, 0.78)",
+                        borderRadius: 12,
+                        yAxisID: "y"
+                    },
+                    {
+                        label: "Avg Score %",
+                        data: analyticsData.quiz_averages,
+                        type: "line",
+                        borderColor: "#16a34a",
+                        backgroundColor: "rgba(22, 163, 74, 0.15)",
+                        tension: 0.35,
+                        yAxisID: "y1"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {legend: {position: "bottom"}},
+                scales: {
+                    y: {beginAtZero: true, ticks: {precision: 0}},
+                    y1: {beginAtZero: true, max: 100, position: "right", grid: {drawOnChartArea: false}}
+                }
+            }
+        });
     }
-    }
-    }
+
+    new Chart(document.getElementById("scoreDistributionChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Needs Support", "Developing", "Strong"],
+            datasets: [{
+                data: analyticsData.score_distribution,
+                backgroundColor: ["#ef4444", "#f59e0b", "#22c55e"],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {legend: {position: "bottom"}},
+            cutout: "62%"
+        }
     });
 
+    new Chart(document.getElementById("questionTypeChart"), {
+        type: "polarArea",
+        data: {
+            labels: analyticsData.question_type_labels,
+            datasets: [{
+                data: analyticsData.question_type_values,
+                backgroundColor: ["rgba(37,99,235,0.78)", "rgba(22,163,74,0.72)", "rgba(217,119,6,0.72)"]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {legend: {position: "bottom"}}
+        }
+    });
 </script>
-
 </body>
 </html>

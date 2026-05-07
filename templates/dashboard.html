@@ -2,186 +2,261 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>GMTech Dashboard</title>
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
-<body class="dashboard-body">
+<body class="dashboard-body gm-dashboard-body">
 
+{% set total_quizzes = quizzes|length %}
+{% set active_quizzes = quizzes|selectattr('status', 'equalto', 'active')|list|length %}
+{% set upcoming_quizzes = quizzes|selectattr('status', 'equalto', 'upcoming')|list|length %}
+{% set attempts = profile.total_attempts if profile else 0 %}
+{% set average_score = profile.average_percentage if profile else 0 %}
 
-<!-- Navbar -->
+<nav class="gm-top-nav gm-top-nav-{{ role }}">
+    <a class="gm-brand" href="/dashboard">
+        <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" alt="GMTech">
+        <span>
+            <strong>GMTech</strong>
+            <small>Assessment Platform</small>
+        </span>
+    </a>
 
-<nav class="navbar navbar-dark bg-dark dashboard-nav">
-
-    <div class="container-fluid">
-
-<span class="navbar-brand">
-GMTech Assessment Platform
-</span>
-
-        <div class="nav-right">
-
-<span class="text-white me-3">
-Welcome {{ user }}
-</span>
-
-            <a href="/logout" class="logout-btn">
-                Logout
-            </a>
-
-        </div>
-
+    <div class="gm-nav-links">
+        <a class="active" href="/dashboard">Dashboard</a>
+        {% if role == 'admin' %}
+        <a href="/create_quiz">Create Quiz</a>
+        <a href="/add_question">Add Questions</a>
+        <a href="/admin_results">Results</a>
+        <a href="/analytics">Analytics</a>
+        <a href="/ai_tools">AI Tools</a>
+        {% else %}
+        <a href="/history">History</a>
+        <a href="/profile">Profile</a>
+        <a href="/certificates">Certificates</a>
+        {% endif %}
     </div>
 
+    <div class="gm-user-actions">
+        <span class="gm-role-pill">{{ role|title }}</span>
+        <span class="gm-user-name">{{ user }}</span>
+        <a href="/change_password">Password</a>
+        <a class="gm-logout" href="/logout">Logout</a>
+    </div>
 </nav>
 
+<main class="gm-dashboard">
+    <section class="gm-welcome-card">
+        <div>
+            <span class="gm-kicker">{{ role|title }} Dashboard</span>
+            <h1>Welcome, {{ user }}</h1>
+            <p>
+                {% if role == 'admin' %}
+                Create assessments, manage questions, review results, and track platform performance.
+                {% else %}
+                Start available assessments, review your progress, and download earned certificates.
+                {% endif %}
+            </p>
+        </div>
+        <div class="gm-welcome-stat">
+            <strong>{{ active_quizzes }}</strong>
+            <span>Active Quizzes</span>
+        </div>
+    </section>
 
+    <section class="gm-stats-grid">
+        <article>
+            <span>Total Quizzes</span>
+            <strong>{{ total_quizzes }}</strong>
+            <small>All assessments</small>
+        </article>
+        <article>
+            <span>Active</span>
+            <strong>{{ active_quizzes }}</strong>
+            <small>Ready now</small>
+        </article>
+        <article>
+            <span>{% if role == 'admin' %}Upcoming{% else %}Attempts{% endif %}</span>
+            <strong>{% if role == 'admin' %}{{ upcoming_quizzes }}{% else %}{{ attempts }}{% endif %}</strong>
+            <small>{% if role == 'admin' %}Scheduled quizzes{% else %}Completed submissions{% endif %}</small>
+        </article>
+        <article>
+            <span>{% if role == 'admin' %}Tools{% else %}Average Score{% endif %}</span>
+            <strong>{% if role == 'admin' %}5{% else %}{{ average_score }}%{% endif %}</strong>
+            <small>{% if role == 'admin' %}Admin shortcuts{% else %}Your performance{% endif %}</small>
+        </article>
+    </section>
 
-<div class="container dashboard-container">
-
-    <h3 class="dashboard-title">Dashboard</h3>
-
-
-    <!-- Action Cards -->
-
-    <div class="row dashboard-actions">
-
-        {% if role == 'admin' %}
-
-        <div class="col-md-3">
-
-            <div class="action-card card-primary">
-
-                <a href="/create_quiz">
-                    Create Quiz
-                </a>
-
+    <section class="gm-card">
+        <div class="gm-section-head">
+            <div>
+                <h2>{% if role == 'admin' %}Admin Tools{% else %}Student Tools{% endif %}</h2>
+                <p>Common actions for your workspace.</p>
             </div>
-
         </div>
 
+        <div class="gm-action-grid">
+            {% if role == 'admin' %}
+            <a class="gm-action-card blue" href="/create_quiz">
+                <strong>Create Quiz</strong>
+                <span>Build a new assessment.</span>
+            </a>
+            <a class="gm-action-card green" href="/add_question">
+                <strong>Add Questions</strong>
+                <span>Bulk MCQ and coding questions.</span>
+            </a>
+            <a class="gm-action-card purple" href="/admin_results">
+                <strong>Student Results</strong>
+                <span>Review submitted attempts.</span>
+            </a>
+            <a class="gm-action-card orange" href="/analytics">
+                <strong>Analytics</strong>
+                <span>Track score and quiz trends.</span>
+            </a>
+            <a class="gm-action-card dark" href="/ai_tools">
+                <strong>AI Tools</strong>
+                <span>Generate content faster.</span>
+            </a>
+            {% else %}
+            <a class="gm-action-card blue" href="/history">
+                <strong>Quiz History</strong>
+                <span>Review previous attempts.</span>
+            </a>
+            <a class="gm-action-card green" href="/profile">
+                <strong>Profile Dashboard</strong>
+                <span>See strengths and weak areas.</span>
+            </a>
+            <a class="gm-action-card purple" href="/certificates">
+                <strong>Certificates</strong>
+                <span>{{ certificates|length }} available.</span>
+            </a>
+            {% endif %}
+        </div>
+    </section>
 
-        <div class="col-md-3">
-
-            <div class="action-card card-success">
-
-                <a href="/add_question">
-                    Add Question
-                </a>
-
+    <section class="gm-card">
+        <div class="gm-section-head">
+            <div>
+                <h2>Available Quizzes</h2>
+                <p>Search, filter, and open assessments.</p>
             </div>
-
+            <span class="gm-count">{{ total_quizzes }} total</span>
         </div>
 
-        {% endif %}
-
-
-        <div class="col-md-3">
-
-            <div class="action-card card-warning">
-
-                <a href="/leaderboard">
-                    Leaderboard
-                </a>
-
+        <div class="gm-quiz-controls">
+            <input id="quizSearch" type="search" placeholder="Search quizzes">
+            <div class="gm-filter-group">
+                <button class="active" type="button" data-filter="all">All</button>
+                <button type="button" data-filter="active">Active</button>
+                <button type="button" data-filter="upcoming">Upcoming</button>
+                <button type="button" data-filter="closed">Closed</button>
             </div>
-
         </div>
 
-
-        <div class="col-md-3">
-
-            <div class="action-card card-danger">
-
-                <a href="/analytics">
-                    Analytics
-                </a>
-
-            </div>
-
+        <div class="gm-table-wrap">
+            <table class="gm-quiz-table">
+                <thead>
+                <tr>
+                    <th>Quiz</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                    <th>Attempts</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for quiz in quizzes %}
+                <tr class="gm-quiz-row"
+                    data-status="{{ quiz.status }}"
+                    data-title="{{ quiz.title|lower }}"
+                    data-description="{{ quiz.description|lower }}">
+                    <td>
+                        <strong>{{ quiz.title }}</strong>
+                        <span>{{ quiz.description }}</span>
+                    </td>
+                    <td><span class="gm-status status-{{ quiz.status }}">{{ quiz.status|title }}</span></td>
+                    <td>{{ quiz.time_limit }} min</td>
+                    <td>
+                        {% if quiz.max_attempts is none %}
+                        Unlimited
+                        {% else %}
+                        {{ quiz.attempts_used }} / {{ quiz.max_attempts }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="gm-table-actions">
+                            {% if role == 'student' %}
+                                {% if quiz.can_start %}
+                                <a class="primary" href="/start_quiz/{{ quiz.id }}">Start</a>
+                                {% else %}
+                                <span class="disabled">Unavailable</span>
+                                {% endif %}
+                            {% endif %}
+                            <a href="/leaderboard/{{ quiz.id }}">Leaderboard</a>
+                            {% if role == 'admin' %}
+                            <a href="/edit_quiz/{{ quiz.id }}">Edit</a>
+                            <a href="/manage_questions/{{ quiz.id }}">Questions</a>
+                            <a class="danger" href="/delete_quiz/{{ quiz.id }}" onclick="return confirm('Delete this quiz?')">Delete</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center py-4">No quizzes found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
+        <div class="gm-empty-filter" id="quizFilterEmpty">No matching quizzes found.</div>
+    </section>
+</main>
 
-    </div>
+<script>
+    const searchInput = document.getElementById("quizSearch");
+    const filterButtons = document.querySelectorAll("[data-filter]");
+    const quizRows = document.querySelectorAll(".gm-quiz-row");
+    const emptyState = document.getElementById("quizFilterEmpty");
+    let activeFilter = "all";
 
+    function applyQuizFilters() {
+        const query = (searchInput?.value || "").trim().toLowerCase();
+        let visibleCount = 0;
 
+        quizRows.forEach((row) => {
+            const status = row.dataset.status || "";
+            const text = `${row.dataset.title || ""} ${row.dataset.description || ""}`;
+            const matchesStatus =
+                activeFilter === "all" ||
+                status === activeFilter ||
+                (activeFilter === "closed" && status === "inactive");
+            const matchesSearch = !query || text.includes(query);
+            const visible = matchesStatus && matchesSearch;
+            row.classList.toggle("hidden", !visible);
+            if (visible) visibleCount += 1;
+        });
 
-    <!-- Quiz Table -->
+        if (emptyState) {
+            emptyState.classList.toggle("show", quizRows.length > 0 && visibleCount === 0);
+        }
+    }
 
-    <div class="quiz-section">
+    filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            activeFilter = button.dataset.filter;
+            filterButtons.forEach((item) => item.classList.remove("active"));
+            button.classList.add("active");
+            applyQuizFilters();
+        });
+    });
 
-        <h4 class="quiz-title">Available Quizzes</h4>
-
-        <table class="table quiz-table table-striped">
-
-            <thead>
-
-            <tr>
-                <th>Quiz</th>
-                <th>Time</th>
-                <th>Action</th>
-            </tr>
-
-            </thead>
-
-            <tbody>
-
-            {% for quiz in quizzes %}
-
-            <tr>
-
-                <td>{{ quiz[1] }}</td>
-
-                <td>{{ quiz[3] }} minutes</td>
-
-                <td>
-
-                    <!-- Start Button -->
-
-                    <a href="/start_quiz/{{ quiz[0] }}"
-                       class="btn btn-primary btn-sm">
-
-                        Start
-
-                    </a>
-
-
-                    <!-- Delete Button (Admin Only) -->
-
-                    {% if role == 'admin' %}
-
-                    <a href="/delete_quiz/{{ quiz[0] }}"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('Are you sure you want to delete this quiz?');">
-
-                        Delete
-
-                    </a>
-
-                    {% endif %}
-
-                </td>
-
-            </tr>
-
-            {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
+    if (searchInput) {
+        searchInput.addEventListener("input", applyQuizFilters);
+    }
+</script>
 
 </body>
 </html>

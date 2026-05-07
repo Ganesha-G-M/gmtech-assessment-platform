@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create Quiz</title>
+    <title>Edit Quiz</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
@@ -85,39 +85,37 @@
 <body class="dashboard-body">
 <div class="container mt-5">
     <div class="auth-card mx-auto" style="max-width:560px;">
-        <h3 class="text-center mb-4">Create New Quiz</h3>
+        <h3 class="text-center mb-4">Edit Quiz</h3>
         <form method="POST">
             <div class="mb-3">
                 <label class="form-label">Quiz Title</label>
-                <input type="text" name="title" class="form-control" required>
+                <input type="text" name="title" class="form-control" value="{{ quiz.title }}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3"></textarea>
+                <textarea name="description" class="form-control" rows="3">{{ quiz.description }}</textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Time Limit (minutes)</label>
-                <input type="number" name="time_limit" class="form-control" required>
+                <input type="number" name="time_limit" class="form-control" value="{{ quiz.time_limit }}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Quiz Status</label>
                 <select name="status" class="form-control" required>
-                    <option value="active">Active</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="closed">Closed</option>
+                    <option value="active" {% if quiz.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="upcoming" {% if quiz.status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                    <option value="closed" {% if quiz.status == 'closed' %}selected{% endif %}>Closed</option>
                 </select>
             </div>
             {% if supports_max_attempts %}
             <div class="mb-3">
                 <label class="form-label">Max Attempts</label>
-                <input type="number" name="max_attempts" class="form-control" min="1" value="1" required>
+                <input type="number" name="max_attempts" class="form-control" min="1" value="{{ quiz.max_attempts or 1 }}" required>
             </div>
-            {% else %}
-            <div class="alert alert-info">Attempt limit support will work after adding the <code>max_attempts</code> column to the database.</div>
             {% endif %}
             {% if supports_proctoring %}
             <label class="proctor-toggle-card" for="proctoringRequired">
-                <input type="checkbox" id="proctoringRequired" name="proctoring_required">
+                <input type="checkbox" id="proctoringRequired" name="proctoring_required" {% if quiz.proctoring_required %}checked{% endif %}>
                 <span class="proctor-toggle-switch"></span>
                 <span class="proctor-toggle-title">Protected Recruitment Quiz</span>
                 <span class="proctor-toggle-copy">Require camera proctoring only for this important quiz. Students must allow camera access before starting.</span>
@@ -126,7 +124,7 @@
             {% else %}
             <div class="alert alert-info">Camera proctoring controls will appear after adding the <code>proctoring_required</code> column to the database.</div>
             {% endif %}
-            <button class="btn btn-primary w-100">Create Quiz</button>
+            <button class="btn btn-primary w-100">Update Quiz</button>
         </form>
         <br>
         <a href="/dashboard" class="btn btn-secondary w-100">Back to Dashboard</a>

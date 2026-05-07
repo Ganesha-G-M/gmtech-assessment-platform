@@ -1,0 +1,5 @@
+ALTER TABLE quizzes
+ADD COLUMN max_attempts INT NOT NULL DEFAULT 1;
+
+ALTER TABLE quizzes
+ADD COLUMN proctoring_required TINYINT(1) NOT NULL DEFAULT 0;

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Certificates</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="dashboard-body">
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1">My Certificates</h3>
+            <p class="text-muted mb-0">View or download only the certificates you want.</p>
+        </div>
+        <a href="/dashboard" class="btn btn-secondary">Back</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Quiz</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Certificate</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for certificate in certificates %}
+                    <tr>
+                        <td>{{ certificate.quiz_title }}</td>
+                        <td>{{ certificate.score }} / {{ certificate.total }}</td>
+                        <td>{{ certificate.percentage }}%</td>
+                        <td>
+                            <a href="/certificate/{{ certificate.result_id }}" class="btn btn-primary btn-sm">
+                                View / Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No certificates available yet.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

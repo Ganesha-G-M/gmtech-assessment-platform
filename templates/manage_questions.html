@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Questions</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-body">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-1">Manage Questions</h3>
+            <p class="text-muted mb-0">{{ quiz_title }}</p>
+        </div>
+        <a href="/dashboard" class="btn btn-secondary">Back</a>
+    </div>
+
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Question</th>
+                {% if coding_supported %}
+                <th>Type</th>
+                {% endif %}
+                <th>Correct Option</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in questions %}
+            <tr>
+                <td>{{ question[1] }}</td>
+                {% if coding_supported %}
+                <td>
+                    <span class="badge {% if question[7] == 'coding' %}bg-primary{% else %}bg-secondary{% endif %}">
+                        {{ question[7]|default('mcq')|title }}
+                    </span>
+                </td>
+                {% endif %}
+                <td>{{ question[6] }}</td>
+                <td>
+                    <a href="/edit_question/{{ question[0] }}" class="btn btn-info btn-sm text-white">Edit</a>
+                    <a href="/delete_question/{{ question[0] }}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this question?')">Delete</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="{% if coding_supported %}4{% else %}3{% endif %}" class="text-center">No questions added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

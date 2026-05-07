@@ -16,123 +16,59 @@
 
 </head>
 
-<body>
+<body class="landing-body">
 
-<!-- Navbar -->
+<nav class="landing-nav">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container landing-nav-inner">
 
-    <div class="container">
+        <a class="landing-brand" href="/">
+            <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" class="landing-brand-logo" alt="GMTech">
+            <span>GMTech</span>
+        </a>
 
-        <a class="navbar-brand" href="#">GMTech</a>
-
-        <div class="ms-auto">
-
-            <a href="/login" class="nav-btn">Login</a>
-            <a href="/register" class="nav-btn-outline">Register</a>
-
+        <div class="landing-nav-actions">
+            <a href="/login" class="landing-link">Login</a>
+            <a href="/register" class="landing-outline-btn">Register</a>
         </div>
 
     </div>
 
 </nav>
 
+<main class="landing-main">
 
-<!-- Hero Section -->
+    <section class="container landing-hero landing-hero-center">
 
-<section class="hero-section">
+        <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}"
+             class="landing-hero-logo"
+             alt="GMTech">
 
-    <div class="container text-center">
-
-        <img src="{{ url_for('static', filename='images/GMTEC.jpeg') }}" class="hero-logo">
-
-        <h1 class="hero-title">
+        <h1 class="landing-title landing-title-center">
             GMTech Assessment Platform
         </h1>
 
-        <p class="hero-subtitle">
-            Smart Online Quiz & Evaluation System for Modern Learning
+        <p style="margin-top:10px; color:#555;">
+            Practice quizzes, test your knowledge, and earn certificates.
         </p>
 
-        <div class="hero-buttons">
+        <div class="landing-cta-group landing-cta-center">
 
-            <a href="/login" class="primary-btn">Start Quiz</a>
-            <a href="/register" class="secondary-btn">Create Account</a>
+            <!-- ✅ SINGLE LOGIN BUTTON -->
+            <a href="/login" class="landing-primary-btn">Login</a>
 
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- Features Section -->
-
-<section class="features">
-
-    <div class="container">
-
-        <div class="row">
-
-            <div class="col-md-4">
-
-                <div class="feature-card">
-
-                    <h3>Online Exams</h3>
-
-                    <p>
-                        Conduct secure online quizzes and assessments easily.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="feature-card">
-
-                    <h3>Instant Results</h3>
-
-                    <p>
-                        Students receive automatic scoring and performance results.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="feature-card">
-
-                    <h3>Analytics</h3>
-
-                    <p>
-                        Track user performance and quiz statistics in real time.
-                    </p>
-
-                </div>
-
-            </div>
+            <!-- ✅ REGISTER -->
+            <a href="/register" class="landing-outline-glow-btn">Create Account</a>
 
         </div>
 
-    </div>
+    </section>
 
-</section>
-
-
-<!-- Footer -->
+</main>
 
 <footer class="footer">
-
-    <p>© 2026 GMTech Assessment Platform</p>
-
+    <p>&copy; 2026 GMTech Assessment Platform</p>
 </footer>
-
 
 </body>
 </html>

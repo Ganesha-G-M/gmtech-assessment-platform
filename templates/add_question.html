@@ -1,91 +1,290 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
-    <title>Add Question</title>
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Questions | GMTech</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+<body class="leet-admin-body gm-light-admin">
 
-<body class="dashboard-body">
+<main class="leet-admin-shell">
+    <aside class="leet-admin-sidebar">
+        <a class="leet-admin-brand" href="/dashboard">GMTech</a>
+        <nav>
+            <a href="/dashboard">Dashboard</a>
+            <a class="active" href="/add_question">Add Questions</a>
+            <a href="/create_quiz">Create Quiz</a>
+            <a href="/admin_results">Results</a>
+        </nav>
+    </aside>
 
-<div class="container mt-5">
+    <section class="leet-admin-main">
+        <header class="leet-admin-header">
+            <div>
+                <span class="leet-kicker">Question Bank</span>
+                <h1>Add Questions</h1>
+                <p>Create multiple MCQs at once, or switch to a coding-question builder with test cases.</p>
+            </div>
+            <a class="leet-ghost-btn" href="/dashboard">Back to Dashboard</a>
+        </header>
 
-    <div class="auth-card mx-auto" style="max-width:600px;">
+        {% if ai_error %}
+        <div class="leet-alert">{{ ai_error }}</div>
+        {% endif %}
 
-        <h3 class="text-center mb-4">Add Question</h3>
+        <div class="leet-tabs" role="tablist">
+            <button class="active" type="button" data-tab="bulk">Bulk MCQ</button>
+            <button type="button" data-tab="single">Single / Coding</button>
+            <button type="button" data-tab="ai">AI Cleanup</button>
+        </div>
 
-        <form method="POST">
+        <section class="leet-tab-panel active" id="bulkPanel">
+            <form method="POST" class="leet-card">
+                <input type="hidden" name="action" value="save_bulk_mcq">
+                <input type="hidden" name="question_count" id="questionCount" value="3">
 
-            <div class="mb-3">
+                <div class="leet-card-title">
+                    <div>
+                        <h2>Bulk MCQ Builder</h2>
+                        <p>Add several multiple-choice questions in one save.</p>
+                    </div>
+                    <button class="leet-secondary-btn" type="button" id="addQuestionBlock">Add MCQ</button>
+                </div>
 
-                <label class="form-label">Select Quiz</label>
+                <label class="leet-field">
+                    Quiz
+                    <select name="quiz_id" required>
+                        {% for quiz in quizzes %}
+                        <option value="{{ quiz[0] }}">{{ quiz[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
 
-                <select name="quiz_id" class="form-control" required>
-
-                    {% for quiz in quizzes %}
-
-                    <option value="{{ quiz[0] }}">
-                        {{ quiz[1] }}
-                    </option>
-
+                <div id="bulkQuestionList" class="leet-question-list">
+                    {% for index in range(1, 4) %}
+                    <article class="leet-question-block" data-index="{{ index }}">
+                        <div class="leet-question-block-head">
+                            <strong>Question {{ index }}</strong>
+                            <button type="button" class="remove-question-block">Remove</button>
+                        </div>
+                        <label class="leet-field">
+                            Question
+                            <textarea name="question_{{ index }}" rows="3" placeholder="Write the question"></textarea>
+                        </label>
+                        <div class="leet-options-grid">
+                            <label class="leet-field">Option 1<input name="option1_{{ index }}" placeholder="Option 1"></label>
+                            <label class="leet-field">Option 2<input name="option2_{{ index }}" placeholder="Option 2"></label>
+                            <label class="leet-field">Option 3<input name="option3_{{ index }}" placeholder="Option 3"></label>
+                            <label class="leet-field">Option 4<input name="option4_{{ index }}" placeholder="Option 4"></label>
+                        </div>
+                        <label class="leet-field compact">
+                            Correct Option
+                            <select name="correct_option_{{ index }}">
+                                <option value="">Select answer</option>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                                <option value="3">Option 3</option>
+                                <option value="4">Option 4</option>
+                            </select>
+                        </label>
+                    </article>
                     {% endfor %}
+                </div>
 
-                </select>
+                <button class="leet-primary-btn" type="submit">Save All Complete MCQs</button>
+            </form>
+        </section>
 
-            </div>
+        <section class="leet-tab-panel" id="singlePanel">
+            <form method="POST" class="leet-card">
+                <input type="hidden" name="action" value="save">
+                <div class="leet-card-title">
+                    <div>
+                        <h2>Single Question Builder</h2>
+                        <p>Use this for one MCQ or one coding question with samples.</p>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Question</label>
-                <textarea name="question" class="form-control" required></textarea>
-            </div>
+                <label class="leet-field">
+                    Quiz
+                    <select name="quiz_id" required>
+                        {% for quiz in quizzes %}
+                        <option value="{{ quiz[0] }}">{{ quiz[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
 
-            <div class="mb-3">
-                <label class="form-label">Option 1</label>
-                <input type="text" name="option1" class="form-control" required>
-            </div>
+                {% if coding_supported %}
+                <label class="leet-field compact">
+                    Question Type
+                    <select name="question_type" id="questionType">
+                        <option value="mcq">MCQ</option>
+                        <option value="coding">Coding Question</option>
+                    </select>
+                </label>
+                {% else %}
+                <div class="leet-alert">Coding questions appear after running <code>database/coding_questions.sql</code>.</div>
+                {% endif %}
 
-            <div class="mb-3">
-                <label class="form-label">Option 2</label>
-                <input type="text" name="option2" class="form-control" required>
-            </div>
+                <label class="leet-field">
+                    Question
+                    <textarea name="question" rows="4" required>{{ cleaned_question.question if cleaned_question else '' }}</textarea>
+                </label>
 
-            <div class="mb-3">
-                <label class="form-label">Option 3</label>
-                <input type="text" name="option3" class="form-control" required>
-            </div>
+                <div id="mcqFields">
+                    <div class="leet-options-grid">
+                        <label class="leet-field">Option 1<input type="text" name="option1" class="mcq-required" value="{{ cleaned_question.option1 if cleaned_question else '' }}" required></label>
+                        <label class="leet-field">Option 2<input type="text" name="option2" class="mcq-required" value="{{ cleaned_question.option2 if cleaned_question else '' }}" required></label>
+                        <label class="leet-field">Option 3<input type="text" name="option3" class="mcq-required" value="{{ cleaned_question.option3 if cleaned_question else '' }}" required></label>
+                        <label class="leet-field">Option 4<input type="text" name="option4" class="mcq-required" value="{{ cleaned_question.option4 if cleaned_question else '' }}" required></label>
+                    </div>
+                    <label class="leet-field compact">
+                        Correct Option
+                        <input type="number" name="correct_option" class="mcq-required" min="1" max="4" value="{{ cleaned_question.correct_option if cleaned_question else '' }}" required>
+                    </label>
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Option 4</label>
-                <input type="text" name="option4" class="form-control" required>
-            </div>
+                {% if coding_supported %}
+                <div id="codingFields" class="leet-coding-fields">
+                    <label class="leet-field compact">
+                        Language
+                        <select name="language_key">
+                            {% for key, language in languages.items() %}
+                            <option value="{{ key }}">{{ language.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label class="leet-field">
+                        Starter Code
+                        <textarea name="starter_code" class="leet-code-area" rows="9" placeholder="Optional starter code for students"></textarea>
+                    </label>
+                    <h3>Test Cases</h3>
+                    {% for index in range(1, 6) %}
+                    <div class="leet-test-case">
+                        <label class="leet-field">Input {{ index }}<textarea name="test_input_{{ index }}" rows="3"></textarea></label>
+                        <label class="leet-field">Expected Output {{ index }}<textarea name="test_output_{{ index }}" rows="3"></textarea></label>
+                        <label class="leet-check"><input type="checkbox" name="test_hidden_{{ index }}"> Hidden grading case</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-            <div class="mb-3">
-                <label class="form-label">Correct Option (1-4)</label>
-                <input type="number" name="correct_option" class="form-control" min="1" max="4" required>
-            </div>
+                <button class="leet-primary-btn" type="submit">Save Question</button>
+            </form>
+        </section>
 
-            <button class="btn btn-success w-100">
-                Add Question
-            </button>
+        <section class="leet-tab-panel" id="aiPanel">
+            <form method="POST" class="leet-card">
+                <input type="hidden" name="action" value="cleanup">
+                <div class="leet-card-title">
+                    <div>
+                        <h2>AI Question Cleanup</h2>
+                        <p>Paste a rough MCQ and convert it into structured fields.</p>
+                    </div>
+                </div>
+                {% if not ai_configured %}
+                <div class="leet-alert">AI cleanup needs <code>OPENAI_API_KEY</code> to be set.</div>
+                {% endif %}
+                <label class="leet-field">
+                    Rough question
+                    <textarea name="raw_question" rows="7" placeholder="Paste question, options, and answer">{{ raw_question or '' }}</textarea>
+                </label>
+                <button class="leet-primary-btn" {% if not ai_configured %}disabled{% endif %}>Clean with AI</button>
+            </form>
+        </section>
+    </section>
+</main>
 
-        </form>
+<template id="questionBlockTemplate">
+    <article class="leet-question-block" data-index="__INDEX__">
+        <div class="leet-question-block-head">
+            <strong>Question __INDEX__</strong>
+            <button type="button" class="remove-question-block">Remove</button>
+        </div>
+        <label class="leet-field">Question<textarea name="question___INDEX__" rows="3" placeholder="Write the question"></textarea></label>
+        <div class="leet-options-grid">
+            <label class="leet-field">Option 1<input name="option1___INDEX__" placeholder="Option 1"></label>
+            <label class="leet-field">Option 2<input name="option2___INDEX__" placeholder="Option 2"></label>
+            <label class="leet-field">Option 3<input name="option3___INDEX__" placeholder="Option 3"></label>
+            <label class="leet-field">Option 4<input name="option4___INDEX__" placeholder="Option 4"></label>
+        </div>
+        <label class="leet-field compact">
+            Correct Option
+            <select name="correct_option___INDEX__">
+                <option value="">Select answer</option>
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+                <option value="4">Option 4</option>
+            </select>
+        </label>
+    </article>
+</template>
 
-        <br>
+<script>
+    const tabs = document.querySelectorAll("[data-tab]");
+    const panels = {
+        bulk: document.getElementById("bulkPanel"),
+        single: document.getElementById("singlePanel"),
+        ai: document.getElementById("aiPanel")
+    };
 
-        <a href="/dashboard" class="btn btn-secondary w-100">
-            Back to Dashboard
-        </a>
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            tabs.forEach((item) => item.classList.remove("active"));
+            tab.classList.add("active");
+            Object.entries(panels).forEach(([key, panel]) => {
+                panel.classList.toggle("active", key === tab.dataset.tab);
+            });
+        });
+    });
 
-    </div>
+    const questionType = document.getElementById("questionType");
+    const mcqFields = document.getElementById("mcqFields");
+    const codingFields = document.getElementById("codingFields");
 
-</div>
+    function refreshQuestionType(){
+        if(!questionType || !codingFields) return;
+        const isCoding = questionType.value === "coding";
+        codingFields.style.display = isCoding ? "block" : "none";
+        mcqFields.style.display = isCoding ? "none" : "block";
+        document.querySelectorAll(".mcq-required").forEach((input) => {
+            input.required = !isCoding;
+        });
+    }
 
+    if(questionType){
+        questionType.addEventListener("change", refreshQuestionType);
+        refreshQuestionType();
+    }
+
+    const questionList = document.getElementById("bulkQuestionList");
+    const addQuestionBlock = document.getElementById("addQuestionBlock");
+    const questionCount = document.getElementById("questionCount");
+    const template = document.getElementById("questionBlockTemplate");
+
+    function bindRemoveButtons(){
+        document.querySelectorAll(".remove-question-block").forEach((button) => {
+            button.onclick = () => {
+                if(document.querySelectorAll(".leet-question-block").length > 1){
+                    button.closest(".leet-question-block").remove();
+                }
+            };
+        });
+    }
+
+    if(addQuestionBlock && questionList && template){
+        addQuestionBlock.addEventListener("click", () => {
+            const nextIndex = Number(questionCount.value) + 1;
+            questionCount.value = String(nextIndex);
+            questionList.insertAdjacentHTML("beforeend", template.innerHTML.replaceAll("__INDEX__", nextIndex));
+            bindRemoveButtons();
+        });
+    }
+
+    bindRemoveButtons();
+</script>
 </body>
 </html>

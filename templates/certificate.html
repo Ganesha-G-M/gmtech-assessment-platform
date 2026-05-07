@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+
+        body{
+            background:#f4f7fb;
+            padding:20px;
+        }
+
+        /* Buttons */
+        .certificate-actions{
+            max-width:1000px;
+            margin:0 auto 15px;
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        /* MAIN CERTIFICATE */
+        .certificate-card{
+            width:1000px;
+            margin:auto;
+
+            /* 🔥 GOLD BACKGROUND */
+            background: linear-gradient(135deg, #ffffff, #fffdf5);
+
+            padding:40px 30px;
+            text-align:center;
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            gap:12px;
+
+            border-radius:12px;
+
+            /* 🔥 GOLD BORDER */
+            border:8px solid;
+            border-image: linear-gradient(45deg, #d4af37, #f9e79f, #d4af37) 1;
+
+            box-shadow:0 20px 60px rgba(0,0,0,0.15);
+
+            position:relative;
+
+            min-height:600px;
+        }
+
+        /* 🔥 INNER GOLD BORDER */
+        .certificate-card::after {
+            content:"";
+            position:absolute;
+            top:10px;
+            left:10px;
+            right:10px;
+            bottom:10px;
+            border:2px solid rgba(212,175,55,0.6);
+            border-radius:10px;
+        }
+
+        /* Corners */
+        .corner{ position:absolute; }
+
+        .top-left{
+            top:0; left:0;
+            width:120px; height:120px;
+            background:linear-gradient(135deg,#00c6ff,#0072ff);
+            clip-path:polygon(0 0,100% 0,0 100%);
+        }
+
+        .bottom-right{
+            bottom:0; right:0;
+            width:120px; height:120px;
+            background:linear-gradient(135deg,#00c6ff,#0072ff);
+            clip-path:polygon(100% 0,100% 100%,0 100%);
+        }
+
+        .top-right{
+            top:20px; right:20px;
+            width:70px; height:70px;
+            border-top:4px solid #4b2aad;
+            border-right:4px solid #4b2aad;
+        }
+
+        .bottom-left{
+            bottom:20px; left:20px;
+            width:70px; height:70px;
+            border-bottom:4px solid #4b2aad;
+            border-left:4px solid #4b2aad;
+        }
+
+        /* TEXT */
+        .certificate-subtitle{
+            font-size:14px;
+            letter-spacing:2px;
+            color:#64748b;
+            position:relative;
+            z-index:1;
+        }
+
+        /* 🔥 GOLD TITLE */
+        .certificate-title{
+            font-size:36px;
+            font-weight:700;
+            color:#b8962e;
+            position:relative;
+            z-index:1;
+        }
+
+        .certificate-copy{
+            font-size:18px;
+            color:#555;
+            margin:8px 0;
+            position:relative;
+            z-index:1;
+        }
+
+        /* 🔥 ENHANCED NAME */
+        .certificate-name{
+            font-size:34px;
+            font-weight:700;
+            color:#1d4ed8;
+            margin:15px 0;
+            letter-spacing:1px;
+            position:relative;
+            z-index:1;
+        }
+
+        .certificate-quiz{
+            font-size:22px;
+            font-weight:600;
+            margin:10px 0;
+            position:relative;
+            z-index:1;
+        }
+
+        /* Bottom section */
+        .bottom-section{
+            display:grid;
+            grid-template-columns:1fr auto 1fr;
+            align-items:center;
+            margin-top:20px;
+            position:relative;
+            z-index:1;
+        }
+
+        .qr img{
+            width:90px;
+        }
+
+        .qr{
+            justify-self:end;
+        }
+
+        .bottom-logo{
+            justify-self:start;
+        }
+
+        .cert-id{
+            font-size:14px;
+            text-align:center;
+            justify-self:center;
+        }
+
+        .bottom-logo img{
+            width:72px;
+            height:72px;
+            object-fit:contain;
+            border-radius:8px;
+        }
+
+        /* Footer */
+        .certificate-footer{
+            text-align:center;
+            font-size:14px;
+            margin-top:15px;
+            position:relative;
+            z-index:1;
+        }
+
+        /* ================= PRINT ================= */
+        @media print {
+
+            body{
+                margin:0;
+                padding:0;
+                background:white;
+            }
+
+            .certificate-card{
+                width:100%;
+                margin:0;
+                padding:30px;
+                box-shadow:none;
+                border-radius:0;
+            }
+
+            .certificate-actions{
+                display:none;
+            }
+
+            @page{
+                size:A4 landscape;
+                margin:10mm;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="certificate-actions">
+    <a href="/dashboard" class="btn btn-secondary">Back</a>
+    <button onclick="window.print()" class="btn btn-primary">Print / Save PDF</button>
+</div>
+
+<div class="certificate-card">
+
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <div class="certificate-subtitle">GMTech Assessment Platform</div>
+
+    <div class="certificate-title">CERTIFICATE OF COMPLETION</div>
+
+    <div class="certificate-copy">Presented to</div>
+
+    <div class="certificate-name">{{ username }}</div>
+
+    <div class="certificate-copy">
+        For successfully completing the assessment
+    </div>
+
+    <div class="certificate-quiz">{{ quiz_title }}</div>
+
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+
+        <div class="bottom-logo">
+            <img
+                    src="{{ url_for('static', filename='images/GMTEC.jpeg') }}"
+                    alt="GMTech logo">
+        </div>
+
+        <!-- Certificate ID -->
+        <div class="cert-id">
+            Certificate ID:<br>
+            <b>{{ result_id }}</b>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr">
+            <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=http://127.0.0.1:5000/certificate/{{ result_id }}"
+                    alt="QR Code">
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="certificate-footer">
+        Issued on {{ issue_date }} by <b>GMTech Assessment Platform</b>
+    </div>
+
+</div>
+
+</body>
+</html>

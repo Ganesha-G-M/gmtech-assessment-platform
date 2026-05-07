@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local app/runtime data
+local_code_runs/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

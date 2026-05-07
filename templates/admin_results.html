@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Results | GMTech</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root{
+            --results-ink:#111827;
+            --results-muted:#64748b;
+            --results-line:#dbe4f0;
+            --results-card:#ffffff;
+            --results-blue:#2563eb;
+            --results-green:#16a34a;
+            --results-red:#dc2626;
+            --results-amber:#d97706;
+        }
+
+        .results-body{
+            min-height:100vh;
+            background:
+                radial-gradient(circle at 8% 6%, rgba(37,99,235,0.15), transparent 28rem),
+                radial-gradient(circle at 92% 10%, rgba(217,119,6,0.12), transparent 24rem),
+                linear-gradient(135deg, #f8fbff 0%, #edf4f7 100%);
+            color:var(--results-ink);
+        }
+
+        .results-shell{
+            max-width:1240px;
+            margin:0 auto;
+            padding:34px 18px 52px;
+        }
+
+        .results-hero{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:22px;
+            margin-bottom:24px;
+        }
+
+        .results-kicker{
+            display:inline-flex;
+            padding:7px 12px;
+            border-radius:999px;
+            background:#dcfce7;
+            color:#166534;
+            font-weight:800;
+            font-size:13px;
+            margin-bottom:10px;
+        }
+
+        .results-hero h1{
+            margin:0 0 8px;
+            font-size:38px;
+            font-weight:850;
+            letter-spacing:-0.04em;
+        }
+
+        .results-hero p{
+            color:var(--results-muted);
+            margin:0;
+            max-width:650px;
+        }
+
+        .results-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+
+        .results-link{
+            text-decoration:none;
+            border-radius:14px;
+            padding:12px 16px;
+            font-weight:800;
+            color:white;
+            background:var(--results-ink);
+            box-shadow:0 16px 35px rgba(15,23,42,0.14);
+        }
+
+        .results-link.secondary{
+            background:white;
+            color:var(--results-ink);
+            border:1px solid var(--results-line);
+        }
+
+        .results-metrics{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0, 1fr));
+            gap:16px;
+            margin-bottom:18px;
+        }
+
+        .results-card{
+            background:rgba(255,255,255,0.9);
+            border:1px solid rgba(219,228,240,0.95);
+            border-radius:24px;
+            padding:20px;
+            box-shadow:0 18px 45px rgba(15,23,42,0.08);
+            backdrop-filter:blur(10px);
+        }
+
+        .metric-label{
+            display:block;
+            color:var(--results-muted);
+            font-size:12px;
+            font-weight:800;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+            margin-bottom:8px;
+        }
+
+        .metric-value{
+            font-size:32px;
+            font-weight:850;
+            letter-spacing:-0.04em;
+        }
+
+        .metric-note{
+            display:block;
+            color:var(--results-muted);
+            font-size:14px;
+            margin-top:5px;
+        }
+
+        .results-filters{
+            display:grid;
+            grid-template-columns:1.2fr 0.9fr 0.9fr auto;
+            gap:12px;
+            align-items:end;
+            margin-bottom:18px;
+        }
+
+        .filter-field label{
+            display:block;
+            color:var(--results-muted);
+            font-size:13px;
+            font-weight:800;
+            margin-bottom:7px;
+        }
+
+        .filter-field input,
+        .filter-field select{
+            width:100%;
+            border:1px solid var(--results-line);
+            border-radius:14px;
+            padding:12px 13px;
+            background:#f8fafc;
+            color:var(--results-ink);
+            outline:none;
+        }
+
+        .filter-btn{
+            border:0;
+            border-radius:14px;
+            padding:12px 18px;
+            background:var(--results-blue);
+            color:white;
+            font-weight:850;
+        }
+
+        .results-table-wrap{
+            overflow:auto;
+        }
+
+        .results-table{
+            width:100%;
+            min-width:960px;
+            border-collapse:separate;
+            border-spacing:0 10px;
+        }
+
+        .results-table th{
+            color:var(--results-muted);
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:0.08em;
+            padding:0 12px;
+            white-space:nowrap;
+        }
+
+        .results-table td{
+            background:#f8fafc;
+            border-top:1px solid var(--results-line);
+            border-bottom:1px solid var(--results-line);
+            padding:14px 12px;
+            vertical-align:middle;
+        }
+
+        .results-table td:first-child{
+            border-left:1px solid var(--results-line);
+            border-radius:16px 0 0 16px;
+            font-weight:800;
+        }
+
+        .results-table td:last-child{
+            border-right:1px solid var(--results-line);
+            border-radius:0 16px 16px 0;
+        }
+
+        .student-email{
+            display:block;
+            color:var(--results-muted);
+            font-size:13px;
+            font-weight:500;
+            margin-top:3px;
+        }
+
+        .score-meter{
+            display:grid;
+            grid-template-columns:74px 1fr;
+            gap:10px;
+            align-items:center;
+            min-width:180px;
+        }
+
+        .score-meter strong{
+            font-size:16px;
+        }
+
+        .score-track{
+            height:9px;
+            border-radius:999px;
+            background:#e2e8f0;
+            overflow:hidden;
+        }
+
+        .score-fill{
+            height:100%;
+            border-radius:999px;
+            background:linear-gradient(90deg, #2563eb, #22c55e);
+        }
+
+        .status-pill{
+            display:inline-flex;
+            padding:7px 11px;
+            border-radius:999px;
+            font-weight:850;
+            font-size:12px;
+        }
+
+        .status-pass{background:#dcfce7;color:#166534;}
+        .status-fail{background:#fee2e2;color:#991b1b;}
+        .status-clean{background:#e0f2fe;color:#075985;}
+        .status-flag{background:#ffedd5;color:#9a3412;}
+
+        .row-actions{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+
+        .row-actions a{
+            text-decoration:none;
+            padding:8px 11px;
+            border-radius:11px;
+            font-size:13px;
+            font-weight:850;
+            border:1px solid var(--results-line);
+            color:var(--results-ink);
+            background:white;
+        }
+
+        .row-actions a.primary{
+            color:white;
+            background:var(--results-green);
+            border-color:var(--results-green);
+        }
+
+        .logs-grid{
+            display:grid;
+            gap:10px;
+        }
+
+        .log-item{
+            display:grid;
+            grid-template-columns:1fr auto;
+            gap:12px;
+            padding:14px;
+            border:1px solid var(--results-line);
+            border-radius:16px;
+            background:#f8fafc;
+        }
+
+        .log-item strong{
+            display:block;
+            margin-bottom:4px;
+        }
+
+        .log-item p{
+            color:var(--results-muted);
+            margin:0;
+            font-size:14px;
+        }
+
+        .log-time{
+            color:var(--results-muted);
+            font-size:13px;
+            white-space:nowrap;
+        }
+
+        .empty-note{
+            color:var(--results-muted);
+            background:#f8fafc;
+            border:1px dashed var(--results-line);
+            border-radius:18px;
+            padding:18px;
+            margin:0;
+        }
+
+        @media (max-width: 980px){
+            .results-metrics,
+            .results-filters{
+                grid-template-columns:1fr 1fr;
+            }
+        }
+
+        @media (max-width: 700px){
+            .results-hero{
+                flex-direction:column;
+            }
+
+            .results-actions{
+                justify-content:flex-start;
+            }
+
+            .results-metrics,
+            .results-filters{
+                grid-template-columns:1fr;
+            }
+
+            .results-hero h1{
+                font-size:30px;
+            }
+        }
+    </style>
+</head>
+<body class="results-body">
+<main class="results-shell">
+    <header class="results-hero">
+        <div>
+            <span class="results-kicker">Assessment Control</span>
+            <h1>Student Results</h1>
+            <p>Review attempts, spot struggling students, verify certificates, and monitor suspicious quiz activity.</p>
+        </div>
+        <div class="results-actions">
+            <a class="results-link secondary" href="/analytics">Analytics</a>
+            <a class="results-link" href="/dashboard">Dashboard</a>
+        </div>
+    </header>
+
+    <section class="results-metrics">
+        <article class="results-card">
+            <span class="metric-label">Shown Attempts</span>
+            <strong class="metric-value">{{ total_attempts }}</strong>
+            <span class="metric-note">Filtered result count</span>
+        </article>
+        <article class="results-card">
+            <span class="metric-label">Passed</span>
+            <strong class="metric-value">{{ passed_attempts }}</strong>
+            <span class="metric-note">Pass mark: {{ pass_percentage }}%</span>
+        </article>
+        <article class="results-card">
+            <span class="metric-label">Average</span>
+            <strong class="metric-value">{{ average_percentage }}%</strong>
+            <span class="metric-note">Across visible attempts</span>
+        </article>
+        <article class="results-card">
+            <span class="metric-label">Flagged</span>
+            <strong class="metric-value">{{ flagged_attempts }}</strong>
+            <span class="metric-note">Attempts with anti-cheat events</span>
+        </article>
+    </section>
+
+    <section class="results-card">
+        <form class="results-filters" method="GET" action="/admin_results">
+            <div class="filter-field">
+                <label>Search</label>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Student, email, or quiz">
+            </div>
+            <div class="filter-field">
+                <label>Quiz</label>
+                <select name="quiz">
+                    <option value="all">All quizzes</option>
+                    {% for quiz in quiz_options %}
+                    <option value="{{ quiz[0] }}" {% if selected_quiz|string == quiz[0]|string %}selected{% endif %}>{{ quiz[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label>Status</label>
+                <select name="status">
+                    <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All statuses</option>
+                    <option value="pass" {% if selected_status == 'pass' %}selected{% endif %}>Passed</option>
+                    <option value="fail" {% if selected_status == 'fail' %}selected{% endif %}>Needs support</option>
+                </select>
+            </div>
+            <button class="filter-btn" type="submit">Apply</button>
+        </form>
+
+        {% if data %}
+        <div class="results-table-wrap">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Quiz</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>Anti-cheat</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in data %}
+                    <tr>
+                        <td>
+                            {{ result.username }}
+                            <span class="student-email">{{ result.email }}</span>
+                        </td>
+                        <td>{{ result.quiz_title }}</td>
+                        <td>
+                            <div class="score-meter">
+                                <strong>{{ result.score }}/{{ result.total }}</strong>
+                                <div class="score-track"><div class="score-fill" style="width: {{ result.percentage }}%;"></div></div>
+                            </div>
+                            <span class="student-email">{{ result.percentage }}%</span>
+                        </td>
+                        <td>
+                            {% if result.passed %}
+                            <span class="status-pill status-pass">Passed</span>
+                            {% else %}
+                            <span class="status-pill status-fail">Needs Support</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.anti_cheat_count %}
+                            <span class="status-pill status-flag">{{ result.anti_cheat_count }} event(s)</span>
+                            {% else %}
+                            <span class="status-pill status-clean">Clean</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                {% if review_available %}
+                                <a href="/review/{{ result.id }}">Review</a>
+                                {% endif %}
+                                {% if result.passed %}
+                                <a class="primary" href="/certificate/{{ result.id }}">Certificate</a>
+                                {% else %}
+                                <a href="/certificate/{{ result.id }}">Verify</a>
+                                {% endif %}
+                                <a href="/leaderboard/{{ result.quiz_id }}">Leaderboard</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-note">No results match these filters yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="results-card mt-4">
+        <h2 class="h4 mb-3">Recent Anti-cheat Logs</h2>
+        {% if anti_cheat_logs %}
+        <div class="logs-grid">
+            {% for log in anti_cheat_logs %}
+            <article class="log-item">
+                <div>
+                    <strong>{{ log[0] }} ? Quiz #{{ log[1] }} ? {{ log[2] }}</strong>
+                    <p>{{ log[3] or 'No additional details' }}</p>
+                </div>
+                <span class="log-time">{{ log[4] }}</span>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-note">No anti-cheat events recorded.</p>
+        {% endif %}
+    </section>
+</main>
+</body>
+</html>

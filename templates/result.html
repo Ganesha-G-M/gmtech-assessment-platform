@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Quiz Result</title>
 
@@ -14,31 +11,201 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
 
+    <style>
+
+        .result-page-body{
+        background:linear-gradient(180deg, #eef4fb 0%, #f7f9fc 100%);
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:24px;
+        }
+
+        .result-page-card{
+        width:100%;
+        max-width:720px;
+        background:white;
+        border:1px solid #e2e8f0;
+        border-radius:24px;
+        box-shadow:0 20px 50px rgba(15,23,42,0.08);
+        padding:40px;
+        text-align:center;
+        }
+
+        .result-page-badge{
+        display:inline-block;
+        padding:8px 16px;
+        border-radius:999px;
+        background:#dcfce7;
+        color:#166534;
+        font-weight:600;
+        font-size:14px;
+        margin-bottom:18px;
+        }
+
+        .result-page-title{
+        font-size:34px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:10px;
+        }
+
+        .result-page-subtitle{
+        color:#64748b;
+        margin-bottom:28px;
+        font-size:16px;
+        }
+
+        .result-page-score{
+        margin-bottom:28px;
+        }
+
+        .result-page-score-label{
+        display:block;
+        color:#64748b;
+        font-size:15px;
+        margin-bottom:10px;
+        }
+
+        .result-page-score-value{
+        font-size:56px;
+        font-weight:700;
+        color:#2563eb;
+        line-height:1;
+        }
+
+        .result-page-grid{
+        display:grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap:18px;
+        margin-bottom:30px;
+        }
+
+        .result-page-stat{
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-radius:18px;
+        padding:22px;
+        }
+
+        .result-page-stat span{
+        display:block;
+        color:#64748b;
+        font-size:14px;
+        margin-bottom:8px;
+        }
+
+        .result-page-stat strong{
+        font-size:28px;
+        color:#0f172a;
+        }
+
+        .result-page-actions .btn{
+        border-radius:10px;
+        padding:12px 24px;
+        font-weight:600;
+        }
+
+        .result-page-actions{
+        display:flex;
+        justify-content:center;
+        gap:12px;
+        flex-wrap:wrap;
+        }
+
+        .result-page-note{
+        color:#64748b;
+        font-size:14px;
+        margin-top:16px;
+        }
+
+        .result-page-ai{
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        color:#1e3a8a;
+        border-radius:18px;
+        padding:18px;
+        text-align:left;
+        margin-bottom:24px;
+        }
+
+        .result-page-ai strong{
+        display:block;
+        margin-bottom:8px;
+        color:#1d4ed8;
+        }
+
+        @media (max-width: 768px){
+        .result-page-card{
+        padding:28px 22px;
+        }
+
+        .result-page-title{
+        font-size:28px;
+        }
+
+        .result-page-score-value{
+        font-size:42px;
+        }
+
+        .result-page-grid{
+        grid-template-columns:1fr;
+        }
+        }
+
+    </style>
+
 </head>
 
-<body class="result-body">
+<body class="result-page-body">
 
-<div class="result-card text-center">
+<div class="result-page-card">
+    <span class="result-page-badge">Assessment Completed</span>
 
-    <h2>Quiz Result</h2>
+    <h1 class="result-page-title">Your result is ready</h1>
+    <p class="result-page-subtitle">You have successfully completed the quiz. Here is your final performance summary.</p>
 
-    <p class="mt-3">Your Score</p>
+    <div class="result-page-score">
+        <span class="result-page-score-label">Final Score</span>
+        <div class="result-page-score-value">{{ score }} / {{ total }}</div>
+    </div>
 
-    <h1 class="score-value">
-        {{ score }} / {{ total }}
-    </h1>
+    <div class="result-page-grid">
+        <div class="result-page-stat">
+            <span>Rank</span>
+            <strong>{{ rank }} / {{ participants }}</strong>
+        </div>
 
-    <br>
+        <div class="result-page-stat">
+            <span>Percentage</span>
+            <strong>{{ percentage }}%</strong>
+        </div>
+    </div>
 
-    <a href="/dashboard" class="result-btn-primary">
-        Back to Dashboard
-    </a>
+    {% if ai_feedback %}
+    <div class="result-page-ai">
+        <strong>AI Performance Feedback</strong>
+        {{ ai_feedback }}
+    </div>
+    {% endif %}
 
-    <a href="/leaderboard" class="result-btn-secondary">
-        View Leaderboard
-    </a>
+    <div class="result-page-actions">
+        {% if review_available %}
+        <a href="/review/{{ result_id }}" class="btn btn-primary">Review Answers</a>
+        {% endif %}
+        <a href="/dashboard" class="btn btn-success">Back to Dashboard</a>
+    </div>
 
+    <div class="result-page-note">
+        {% if certificate_available %}
+        If eligible, your certificate will be available in the dashboard under <strong>My Certificates</strong>.
+        {% else %}
+        Certificates are shown in <strong>My Certificates</strong> only for scores above {{ 50 }}%.
+        {% endif %}
+    </div>
 </div>
 
 </body>
+
 </html>
